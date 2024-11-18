@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from enum import Enum as BaseEnum
 import pytz
-from sqlalchemy import CHAR, Column, DateTime, ForeignKey, Integer, String, Enum, Table, UniqueConstraint
+from sqlalchemy import CHAR, CheckConstraint, Column, DateTime, ForeignKey, Integer, String, Enum, Table, UniqueConstraint
 
 from ..user.models import Base
 
@@ -11,6 +11,17 @@ practice_developers = Table(
     Column("practice_id", Integer, ForeignKey("practices.id"), nullable=False),
     Column("user_id", Integer, ForeignKey("users.id"), nullable=False),
     UniqueConstraint("practice_id", "user_id", name="uq_practice_developers")
+)
+
+practice_modules = Table(
+    "practice_modules", 
+    Base.metadata,
+    Column("number", Integer, nullable=False),
+    Column("practice_id", Integer, ForeignKey("practices.id"), nullable=False),
+    Column("module_id", Integer, ForeignKey("modules.id"), nullable=False),
+    UniqueConstraint("practice_id", "module_id", name="uq_practice_modules"),
+    UniqueConstraint("module_id", "number", name="uq_module_number"),
+    CheckConstraint("number > 0", name="chk_number_positive")
 )
 
 class PracticeType(BaseEnum):
