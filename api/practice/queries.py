@@ -1,3 +1,4 @@
+from typing import Optional
 from fastapi import HTTPException, status
 from sqlalchemy.future import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -29,3 +30,31 @@ async def create_specialization(
     await session.refresh(new_specialization)
 
     return new_specialization
+
+
+async def get_specialization(
+    session: AsyncSession, id: Optional[int], code: Optional[str], title: Optional[str]
+) -> Specialization:
+    if not any([id, code, title]):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Введите хотя бы один параметр: id, code или title.",
+        )
+
+    query = select(Specialization)
+    if id:
+        query = query.where(Specialization.id == id)
+    elif code:
+        query = query.where(Specialization.code == code)
+    elif title:
+        query = query.where(Specialization.title == title)
+
+    result = await session.execute(query)
+    specialization = result.scalar_one_or_none()
+
+    if not specialization:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Специальность не найдена."
+        )
+
+    return specialization

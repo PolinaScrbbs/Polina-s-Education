@@ -13,7 +13,7 @@ from .schemes import SpecializationCreate, SpecializationInDB
 router = APIRouter(prefix="/practices")
 
 
-@router.post("", response_model=SpecializationInDB, status_code=status.HTTP_201_CREATED)
+@router.post("/specializations", response_model=SpecializationInDB, status_code=status.HTTP_201_CREATED)
 async def create_specialization(
     specialization_create: SpecializationCreate,
     session: AsyncSession = Depends(get_session),
@@ -22,3 +22,15 @@ async def create_specialization(
     await admin_check(current_user)
     new_specialization = await qr.create_specialization(session, specialization_create)
     return new_specialization
+
+
+@router.get("/specializations", response_model=SpecializationInDB)
+async def get_specialization(
+    id: Optional[int] = None,
+    code: Optional[str] = None,
+    title: Optional[str] = None,
+    session: AsyncSession = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+):
+    specialization = await qr.get_specialization(session, id, code, title)
+    return specialization
