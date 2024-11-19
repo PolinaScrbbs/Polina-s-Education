@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import List, Optional
 from fastapi import Depends, APIRouter, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -13,7 +13,11 @@ from .schemes import SpecializationCreate, SpecializationInDB
 router = APIRouter(prefix="/practices")
 
 
-@router.post("/specializations", response_model=SpecializationInDB, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/specializations",
+    response_model=SpecializationInDB,
+    status_code=status.HTTP_201_CREATED,
+)
 async def create_specialization(
     specialization_create: SpecializationCreate,
     session: AsyncSession = Depends(get_session),
@@ -24,7 +28,16 @@ async def create_specialization(
     return new_specialization
 
 
-@router.get("/specializations", response_model=SpecializationInDB)
+@router.get("/specializations", response_model=List[SpecializationInDB])
+async def get_specializations(
+    session: AsyncSession = Depends(get_session),
+    # current_user: User = Depends(get_current_user),
+):
+    specializations = await qr.get_specializations(session)
+    return specializations
+
+
+@router.get("/specialization", response_model=SpecializationInDB)
 async def get_specialization(
     id: Optional[int] = None,
     code: Optional[str] = None,

@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import List, Optional
 from fastapi import HTTPException, status
 from sqlalchemy.future import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -17,8 +17,8 @@ async def create_specialization(
 
     if exist:
         raise HTTPException(
-            status.HTTP_409_CONFLICT,
-            "Код или специальность с таким названием уже существует",
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Код или специальность с таким названием уже существует",
         )
 
     new_specialization = Specialization(
@@ -30,6 +30,20 @@ async def create_specialization(
     await session.refresh(new_specialization)
 
     return new_specialization
+
+
+async def get_specializations(session: AsyncSession) -> List[Specialization]:
+    result = await session.execute(
+        select(Specialization).order_by(Specialization.title)
+    )
+    specializations = result.scalars().all()
+
+    if not specializations:
+        raise HTTPException(
+            status_code=status.HTTP_204_NO_CONTENT, detail="Список специальностей пуст"
+        )
+
+    return specializations
 
 
 async def get_specialization(
