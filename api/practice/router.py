@@ -67,3 +67,13 @@ async def create_practice_pattern(
         session, practice_patteren_create
     )
     return new_practice_pattern
+
+
+@router.get("/patterns", response_model=List[PracticePatternInDB])
+async def get_practice_patterns(
+    session: AsyncSession = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+):
+    await admin_check(current_user)
+    practice_patterns = await qr.get_practice_patterns(session)
+    return practice_patterns

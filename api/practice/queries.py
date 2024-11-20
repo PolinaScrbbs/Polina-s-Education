@@ -111,3 +111,15 @@ async def create_practice_pattern(
     await session.refresh(new_practice_pattern)
 
     return new_practice_pattern
+
+
+async def get_practice_patterns(session: AsyncSession) -> List[PracticePattern]:
+    result = await session.execute(select(PracticePattern))
+    practice_patterns = result.scalars().all()
+
+    if not practice_patterns:
+        raise HTTPException(
+            status_code=status.HTTP_204_NO_CONTENT, detail="Список патернов пуст"
+        )
+
+    return practice_patterns
