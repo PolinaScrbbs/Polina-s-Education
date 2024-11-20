@@ -1,6 +1,8 @@
+from datetime import datetime, timedelta
 from typing import Optional
 from fastapi import Query
-from pydantic import BaseModel
+from pydantic import BaseModel, model_validator
+import pytz
 from .models import PracticeType
 
 
@@ -33,3 +35,15 @@ class GetPracticePatternsFilters(BaseModel):
     )
     specialization_id: Optional[int] = Query(None, description="ID специальности")
     course_number: Optional[int] = Query(None, description="Номер курса")
+
+
+class PracticeCreate(BaseModel):
+    title: str
+    description: str
+    pattern_id: int
+    start_at: Optional[datetime] = None
+    end_at: Optional[datetime] = None
+
+
+class PracticeWitoutCreator(PracticeCreate, ID):
+    pass

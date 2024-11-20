@@ -1,7 +1,9 @@
+from datetime import datetime, timedelta
+from typing import Optional
 from sqlalchemy import select, exists
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from .models import Specialization, PracticePattern
+from .models import Specialization, PracticePattern, Practice
 
 
 async def specialization_exists(
@@ -34,3 +36,27 @@ async def practice_pattern_exists(
     )
     result = await session.scalar(query)
     return result
+
+
+async def practice_create_validate(
+    session: AsyncSession, title: str, pattern_id: int, start_at: Optional[datetime]
+) -> bool:
+    query = (
+        select(Practice)
+        .where(
+            Practice.title == title,
+            Practice.pattern_id == pattern_id,
+        )
+        .order_by(Practice.start_at.desc())
+        .limit(1)
+    )
+
+    result = await session.execute(query)
+    practice = result.scalar_one_or_none()
+
+    if practice and start_at:
+        time_difference = start_at - practice.start_at
+        if time_difference < timedelta(days=335):
+            return False
+
+    return True

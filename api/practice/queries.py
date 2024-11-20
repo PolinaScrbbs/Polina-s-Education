@@ -1,14 +1,17 @@
+from datetime import datetime
 from typing import List, Optional
 from fastapi import HTTPException, status
+import pytz
 from sqlalchemy.future import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from .models import Specialization, PracticePattern
+from .models import Practice, Specialization, PracticePattern
 from .schemes import (
     PracticePatternInDB,
     SpecializationCreate,
     PracticePatternCreate,
     GetPracticePatternsFilters,
+    PracticeCreate,
 )
 from . import validators as validator
 
@@ -163,3 +166,38 @@ async def get_practice_pattern_by_id(
         )
 
     return practice_pattern
+
+
+async def create_practice(
+    session: AsyncSession, practice_create: PracticeCreate, current_user_id: int
+) -> Practice:
+    exist = await validator.practice_create_validate(
+        session,
+        practice_create.title,
+        practice_create.pattern_id,
+        (
+            practice_create.start_at
+            if practice_create.start_at
+            else datetime.now(pytz.timezone("Europe/Moscow")).replace(tzinfo=None)
+        ),
+    )
+
+    if not exist:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="В этом учебном году уже запланирована подобная практика",
+        )
+
+    new_practice = Practice(
+        title=practice_create.title,
+        description=practice_create.description,
+        pattern_id=practice_create.pattern_id,
+        creator_id=current_user_id,
+        start_at=practice_create.start_at,
+        end_at=practice_create.end_at,
+    )
+
+    session.add(new_practice)
+    await session.commit()
+    await session.refresh(new_practice)
+    return new_practice
