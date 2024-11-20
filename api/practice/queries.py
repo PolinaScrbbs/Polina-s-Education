@@ -5,7 +5,7 @@ from sqlalchemy.future import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from .models import Specialization, PracticePattern
-from .schemes import SpecializationCreate, PracticePatternCreate
+from .schemes import PracticePatternInDB, SpecializationCreate, PracticePatternCreate
 from . import validators as validator
 
 
@@ -123,3 +123,19 @@ async def get_practice_patterns(session: AsyncSession) -> List[PracticePattern]:
         )
 
     return practice_patterns
+
+
+async def get_practice_pattern_by_id(
+    session: AsyncSession, practice_pattern_id: int
+) -> PracticePatternInDB:
+    result = await session.execute(
+        select(PracticePattern).where(PracticePattern.id == practice_pattern_id)
+    )
+    practice_pattern = result.scalar_one_or_none()
+
+    if not practice_pattern:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Паттерн не найден"
+        )
+
+    return practice_pattern
