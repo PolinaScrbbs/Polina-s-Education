@@ -1,11 +1,15 @@
 from typing import List, Optional
 from fastapi import HTTPException, status
-from fastapi.datastructures import DefaultType
 from sqlalchemy.future import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from .models import Specialization, PracticePattern
-from .schemes import PracticePatternInDB, SpecializationCreate, PracticePatternCreate
+from .schemes import (
+    PracticePatternInDB,
+    SpecializationCreate,
+    PracticePatternCreate,
+    GetPracticePatternsFilters,
+)
 from . import validators as validator
 
 
@@ -113,14 +117,34 @@ async def create_practice_pattern(
     return new_practice_pattern
 
 
-async def get_practice_patterns(session: AsyncSession) -> List[PracticePattern]:
-    result = await session.execute(select(PracticePattern))
+async def get_practice_patterns(
+    session: AsyncSession, filters: Optional[GetPracticePatternsFilters]
+) -> List[PracticePattern]:
+    query = select(PracticePattern)
+    if filters:
+        if filters.type is not None:
+            query = query.where(PracticePattern.type == filters.type)
+        if filters.specialization_id is not None:
+            query = query.where(
+                PracticePattern.specialization_id == filters.specialization_id
+            )
+        if filters.course_number is not None:
+            query = query.where(PracticePattern.course_number == filters.course_number)
+
+    result = await session.execute(query)
     practice_patterns = result.scalars().all()
 
     if not practice_patterns:
-        raise HTTPException(
-            status_code=status.HTTP_204_NO_CONTENT, detail="Список патернов пуст"
-        )
+        if not filters:
+            raise HTTPException(
+                status_code=status.HTTP_204_NO_CONTENT,
+                detail="Список паттернов пуст или",
+            )
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_204_NO_CONTENT,
+                detail="Патерный, удовлетворяющие фильтрам не найдены",
+            )
 
     return practice_patterns
 

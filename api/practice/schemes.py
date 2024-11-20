@@ -1,3 +1,5 @@
+from typing import Optional
+from fastapi import Query
 from pydantic import BaseModel
 from .models import PracticeType
 
@@ -23,3 +25,11 @@ class PracticePatternCreate(BaseModel):
 
 class PracticePatternInDB(PracticePatternCreate, ID):
     pass
+
+
+class GetPracticePatternsFilters(BaseModel):
+    type: Optional[PracticeType] = Query(
+        PracticeType.EDUCATIONAL_PRACTICE, description="Тип практики"
+    )
+    specialization_id: Optional[int] = Query(None, description="ID специальности")
+    course_number: Optional[int] = Query(None, description="Номер курса")
