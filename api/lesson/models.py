@@ -2,7 +2,6 @@ from datetime import datetime
 from enum import Enum as BaseEnum
 import pytz
 from sqlalchemy import (
-    CHAR,
     Column,
     DateTime,
     ForeignKey,
@@ -97,7 +96,7 @@ class LessonResultEvaluation(Base):
     lesson_result_id = Column(
         Integer, ForeignKey("lesson_results.id"), unique=True, nullable=False
     )
-    evaluation = Column(CHAR(1), default="5", nullable=False)
+    evaluation = Column(Integer, default=5, nullable=False)
     created_at = Column(
         DateTime,
         default=lambda: datetime.now(pytz.timezone("Europe/Moscow")).replace(

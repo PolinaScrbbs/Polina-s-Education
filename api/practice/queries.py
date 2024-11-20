@@ -1,17 +1,18 @@
 from typing import List, Optional
 from fastapi import HTTPException, status
+from fastapi.datastructures import DefaultType
 from sqlalchemy.future import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from .models import Specialization
-from .schemes import SpecializationCreate
-from .validators import specialization_exists
+from .models import Specialization, PracticePattern
+from .schemes import SpecializationCreate, PracticePatternCreate
+from . import validators as validator
 
 
 async def create_specialization(
     session: AsyncSession, specialization_create: SpecializationCreate
 ) -> Specialization:
-    exist = await specialization_exists(
+    exist = await validator.specialization_exists(
         session, specialization_create.code, specialization_create.title
     )
 
@@ -72,3 +73,41 @@ async def get_specialization(
         )
 
     return specialization
+
+
+async def create_practice_pattern(
+    session: AsyncSession, practice_pattern_create: PracticePatternCreate
+) -> PracticePattern:
+    exist = await validator.specialization_exists_by_id(
+        session, practice_pattern_create.specialization_id
+    )
+
+    if not exist:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Специальность не найдена"
+        )
+
+    exist = await validator.practice_pattern_exists(
+        session,
+        practice_pattern_create.type,
+        practice_pattern_create.specialization_id,
+        practice_pattern_create.course_number,
+    )
+
+    if exist:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Паттерн уже существует",
+        )
+
+    new_practice_pattern = PracticePattern(
+        type=practice_pattern_create.type,
+        specialization_id=practice_pattern_create.specialization_id,
+        course_number=practice_pattern_create.course_number,
+    )
+
+    session.add(new_practice_pattern)
+    await session.commit()
+    await session.refresh(new_practice_pattern)
+
+    return new_practice_pattern

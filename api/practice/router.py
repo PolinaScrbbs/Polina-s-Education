@@ -8,13 +8,18 @@ from ..user.models import User
 from ..user.utils import admin_check
 
 from . import queries as qr
-from .schemes import SpecializationCreate, SpecializationInDB
+from .schemes import (
+    SpecializationCreate,
+    SpecializationInDB,
+    PracticePatternCreate,
+    PracticePatternInDB,
+)
 
 router = APIRouter(prefix="/practices")
 
 
 @router.post(
-    "/specializations",
+    "/specialization",
     response_model=SpecializationInDB,
     status_code=status.HTTP_201_CREATED,
 )
@@ -31,7 +36,7 @@ async def create_specialization(
 @router.get("/specializations", response_model=List[SpecializationInDB])
 async def get_specializations(
     session: AsyncSession = Depends(get_session),
-    # current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
 ):
     specializations = await qr.get_specializations(session)
     return specializations
@@ -47,3 +52,18 @@ async def get_specialization(
 ):
     specialization = await qr.get_specialization(session, id, code, title)
     return specialization
+
+
+@router.post(
+    "/pattern", response_model=PracticePatternInDB, status_code=status.HTTP_201_CREATED
+)
+async def create_practice_pattern(
+    practice_patteren_create: PracticePatternCreate,
+    session: AsyncSession = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+):
+    await admin_check(current_user)
+    new_practice_pattern = await qr.create_practice_pattern(
+        session, practice_patteren_create
+    )
+    return new_practice_pattern

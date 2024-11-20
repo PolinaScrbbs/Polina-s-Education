@@ -2,7 +2,6 @@ from datetime import datetime, timedelta
 from enum import Enum as BaseEnum
 import pytz
 from sqlalchemy import (
-    CHAR,
     CheckConstraint,
     Column,
     DateTime,
@@ -59,7 +58,7 @@ class PracticePattern(Base):
     specialization_id = Column(
         Integer, ForeignKey("specializations.id"), nullable=False
     )
-    course_number = Column(CHAR(1), default="3", nullable=False)
+    course_number = Column(Integer, default=3, nullable=False)
 
 
 class Practice(Base):

@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from .models import PracticeType
 
 
 class ID(BaseModel):
@@ -11,4 +12,14 @@ class SpecializationCreate(BaseModel):
 
 
 class SpecializationInDB(SpecializationCreate, ID):
+    pass
+
+
+class PracticePatternCreate(BaseModel):
+    type: PracticeType = PracticeType.EDUCATIONAL_PRACTICE
+    specialization_id: int
+    course_number: int = 3
+
+
+class PracticePatternInDB(PracticePatternCreate, ID):
     pass
