@@ -11,6 +11,7 @@ from sqlalchemy import (
     Table,
     UniqueConstraint,
 )
+from sqlalchemy.orm import relationship
 
 from ..practice.models import Base
 
@@ -34,6 +35,8 @@ class Module(Base):
     description = Column(String(256), nullable=False)
     creator_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     is_mandatory = Column(Boolean, default=True, nullable=False)
+
+    creator = relationship("User", back_populates="created_modules")
 
 
 class ModuleResult(Base):

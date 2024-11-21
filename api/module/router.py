@@ -1,3 +1,4 @@
+from typing import List
 from fastapi import Depends, APIRouter, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -7,7 +8,7 @@ from ..user.models import User
 from ..user.utils import admin_check
 
 from . import queries as qr
-from .schemes import ModuleCreate, ModuleWithoutCreator
+from .schemes import ModuleCreate, ModuleWithoutCreator, ModuleInDB
 
 router = APIRouter(prefix="/module")
 
@@ -23,3 +24,12 @@ async def create_module(
     await admin_check(current_user)
     new_module = await qr.create_module(session, module_create, current_user.id)
     return new_module
+
+
+@router.get("s", response_model=List[ModuleInDB])
+async def get_modules(
+    session: AsyncSession = Depends(get_session),
+    # current_user: User = Depends(get_current_user),
+):
+    modules = await qr.get_modules(session)
+    return modules

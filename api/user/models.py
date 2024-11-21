@@ -28,6 +28,13 @@ class User(Base):
     full_name = Column(String(50), nullable=False)
     role = Column(Enum(Role), default=Role.STUDENT, nullable=False)
 
+    created_practices = relationship(
+        "Practice", back_populates="creator", cascade="all, delete-orphan"
+    )
+    created_modules = relationship(
+        "Module", back_populates="creator", cascade="all, delete-orphan"
+    )
+
     async def set_password(self, password: str) -> None:
         self.hashed_password = bcrypt.hashpw(
             password.encode("utf-8"), bcrypt.gensalt()
@@ -45,10 +52,6 @@ class User(Base):
             + timedelta(seconds=expires_in),
         }
         return jwt.encode(payload, SECRET_KEY, algorithm="HS256")
-
-    created_practices = relationship(
-        "Practice", back_populates="creator", cascade="all, delete-orphan"
-    )
 
 
 class Token(Base):

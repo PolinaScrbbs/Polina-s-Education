@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 
-from ..user.schemes import ID
+from ..user.schemes import ID, BaseUser
 
 
 class ModuleCreate(BaseModel):
@@ -11,3 +11,7 @@ class ModuleCreate(BaseModel):
 
 class ModuleWithoutCreator(ModuleCreate, ID):
     pass
+
+
+class ModuleInDB(ModuleWithoutCreator):
+    creator: BaseUser
