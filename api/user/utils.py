@@ -1,3 +1,4 @@
+from typing import List
 from fastapi import HTTPException, status
 from sqlalchemy.sql import select, exists
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -5,9 +6,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from .models import User, Role
 
 
-async def role_check(user: User, role: Role, msg: str):
-    if user.role is not role:
-        raise HTTPException(status.HTTP_403_FORBIDDEN, msg)
+async def role_check(
+    user: User,
+    role: List[Role],
+    msg: str,
+    status_code: status = status.HTTP_403_FORBIDDEN,
+) -> None:
+    if user.role not in role:
+        raise HTTPException(status_code, msg)
 
 
 async def user_exists_by_username(session: AsyncSession, username: str) -> bool:

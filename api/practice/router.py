@@ -35,7 +35,7 @@ async def create_specialization(
 ):
     await role_check(
         current_user,
-        Role.ADMIN,
+        [Role.ADMIN],
         "Только администратор имеет доступ к данному эндпоинту",
     )
     new_specialization = await qr.create_specialization(session, specialization_create)
@@ -73,7 +73,7 @@ async def create_practice_pattern(
 ):
     await role_check(
         current_user,
-        Role.ADMIN,
+        [Role.ADMIN],
         "Только администратор имеет доступ к данному эндпоинту",
     )
     new_practice_pattern = await qr.create_practice_pattern(
@@ -90,7 +90,7 @@ async def get_practice_patterns(
 ):
     await role_check(
         current_user,
-        Role.ADMIN,
+        [Role.ADMIN],
         "Только администратор имеет доступ к данному эндпоинту",
     )
     practice_patterns = await qr.get_practice_patterns(session, filters)
@@ -105,7 +105,7 @@ async def get_practice_pattern_by_id(
 ):
     await role_check(
         current_user,
-        Role.ADMIN,
+        [Role.ADMIN],
         "Только администратор имеет доступ к данному эндпоинту",
     )
     practice_pattern = await qr.get_practice_pattern_by_id(session, practice_pattern_id)
@@ -124,7 +124,7 @@ async def create_practice(
 ):
     await role_check(
         current_user,
-        Role.ADMIN,
+        [Role.ADMIN],
         "Только администратор имеет доступ к данному эндпоинту",
     )
     new_practice = await qr.create_practice(session, practice_create, current_user.id)

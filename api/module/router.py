@@ -23,7 +23,7 @@ async def create_module(
 ):
     await role_check(
         current_user,
-        Role.ADMIN,
+        [Role.ADMIN],
         "Только администратор имеет доступ к данному эндпоинту",
     )
     new_module = await qr.create_module(session, module_create, current_user.id)
@@ -56,7 +56,7 @@ async def create_module_result(
     current_user: User = Depends(get_current_user),
 ):
     await role_check(
-        current_user, Role.STUDENT, "Только студент имеет доступ к данному эндпоинту"
+        current_user, [Role.STUDENT], "Только студент имеет доступ к данному эндпоинту"
     )
     await qr.create_module_result(session, module_id, current_user.id)
     return f"Вы, {current_user.username}, начали прохождение модуля"
