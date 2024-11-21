@@ -3,6 +3,7 @@ from typing import List, Optional
 from fastapi import HTTPException, status
 import pytz
 from sqlalchemy.future import select
+from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from .models import Practice, Specialization, PracticePattern
@@ -201,3 +202,12 @@ async def create_practice(
     await session.commit()
     await session.refresh(new_practice)
     return new_practice
+
+
+async def get_practices(session: AsyncSession) -> List[Practice]:
+    result = await session.execute(
+        select(Practice).options(selectinload(Practice.creator))
+    )
+
+    practices = result.scalars().all()
+    return practices

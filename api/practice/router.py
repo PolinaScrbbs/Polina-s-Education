@@ -16,6 +16,7 @@ from .schemes import (
     GetPracticePatternsFilters,
     PracticeCreate,
     PracticeWitoutCreator,
+    PracticeInDB,
 )
 
 router = APIRouter(prefix="/practices")
@@ -107,3 +108,12 @@ async def create_practice(
     await admin_check(current_user)
     new_practice = await qr.create_practice(session, practice_create, current_user.id)
     return new_practice
+
+
+@router.get("", response_model=List[PracticeInDB])
+async def get_practices(
+    session: AsyncSession = Depends(get_session),
+    # current_user: User = Depends(get_current_user),
+):
+    practices = await qr.get_practices(session)
+    return practices

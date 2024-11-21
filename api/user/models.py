@@ -5,6 +5,7 @@ import bcrypt
 import pytz
 from datetime import datetime, timedelta
 from sqlalchemy import Column, ForeignKey, Integer, String, Enum
+from sqlalchemy.orm import relationship
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import HTTPException, status
 
@@ -43,8 +44,11 @@ class User(Base):
             "exp": datetime.now(pytz.timezone("Europe/Moscow"))
             + timedelta(seconds=expires_in),
         }
-        print(f"SECRET_KEY: {SECRET_KEY} (type: {type(SECRET_KEY)})")
         return jwt.encode(payload, SECRET_KEY, algorithm="HS256")
+
+    created_practices = relationship(
+        "Practice", back_populates="creator", cascade="all, delete-orphan"
+    )
 
 
 class Token(Base):

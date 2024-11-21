@@ -12,6 +12,7 @@ from sqlalchemy import (
     Table,
     UniqueConstraint,
 )
+from sqlalchemy.orm import relationship
 
 from ..user.models import Base
 
@@ -81,3 +82,5 @@ class Practice(Base):
             datetime.now(pytz.timezone("Europe/Moscow")) + timedelta(weeks=1)
         ).replace(tzinfo=None),
     )
+
+    creator = relationship("User", back_populates="created_practices")

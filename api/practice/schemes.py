@@ -1,8 +1,9 @@
-from datetime import datetime, timedelta
+from datetime import datetime
 from typing import Optional
 from fastapi import Query
-from pydantic import BaseModel, model_validator
-import pytz
+from pydantic import BaseModel
+
+from ..user.schemes import BaseUser
 from .models import PracticeType
 
 
@@ -47,3 +48,7 @@ class PracticeCreate(BaseModel):
 
 class PracticeWitoutCreator(PracticeCreate, ID):
     pass
+
+
+class PracticeInDB(PracticeWitoutCreator):
+    creator: BaseUser
