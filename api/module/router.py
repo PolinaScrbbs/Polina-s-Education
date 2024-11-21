@@ -29,7 +29,17 @@ async def create_module(
 @router.get("s", response_model=List[ModuleInDB])
 async def get_modules(
     session: AsyncSession = Depends(get_session),
-    # current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
 ):
     modules = await qr.get_modules(session)
     return modules
+
+
+@router.get("", response_model=ModuleInDB)
+async def get_module_by_id(
+    module_id: int,
+    session: AsyncSession = Depends(get_session),
+    # current_user: User = Depends(get_current_user),
+):
+    module = await qr.get_module_by_id(session, module_id)
+    return module

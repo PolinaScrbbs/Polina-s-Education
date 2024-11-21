@@ -36,3 +36,20 @@ async def get_modules(session: AsyncSession) -> List[Module]:
         raise HTTPException(status_code=status.HTTP_204_NO_CONTENT)
 
     return modules
+
+
+async def get_module_by_id(session: AsyncSession, module_id: int) -> Module:
+    result = await session.execute(
+        select(Module)
+        .options(selectinload(Module.creator))
+        .where(Module.id == module_id)
+    )
+
+    module = result.scalar_one_or_none()
+
+    if not module:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Модуль не найден"
+        )
+
+    return module
