@@ -4,8 +4,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..database import get_session
 from ..auth.queries import get_current_user
-from ..user.models import User
-from ..user.utils import admin_check
+from ..user.models import User, Role
+from ..user.utils import role_check
 
 from . import queries as qr
 from .schemes import (
@@ -33,7 +33,7 @@ async def create_specialization(
     session: AsyncSession = Depends(get_session),
     current_user: User = Depends(get_current_user),
 ):
-    await admin_check(current_user)
+    await role_check(current_user, Role.ADMIN, "Только администратор имеет доступ к данному эндпоинту")
     new_specialization = await qr.create_specialization(session, specialization_create)
     return new_specialization
 
@@ -67,7 +67,7 @@ async def create_practice_pattern(
     session: AsyncSession = Depends(get_session),
     current_user: User = Depends(get_current_user),
 ):
-    await admin_check(current_user)
+    await role_check(current_user, Role.ADMIN, "Только администратор имеет доступ к данному эндпоинту")
     new_practice_pattern = await qr.create_practice_pattern(
         session, practice_patteren_create
     )
@@ -80,7 +80,7 @@ async def get_practice_patterns(
     session: AsyncSession = Depends(get_session),
     current_user: User = Depends(get_current_user),
 ):
-    await admin_check(current_user)
+    await role_check(current_user, Role.ADMIN, "Только администратор имеет доступ к данному эндпоинту")
     practice_patterns = await qr.get_practice_patterns(session, filters)
     return practice_patterns
 
@@ -91,7 +91,7 @@ async def get_practice_pattern_by_id(
     session: AsyncSession = Depends(get_session),
     current_user: User = Depends(get_current_user),
 ):
-    await admin_check(current_user)
+    await role_check(current_user, Role.ADMIN, "Только администратор имеет доступ к данному эндпоинту")
     practice_pattern = await qr.get_practice_pattern_by_id(session, practice_pattern_id)
     return practice_pattern
 
@@ -106,7 +106,7 @@ async def create_practice(
     session: AsyncSession = Depends(get_session),
     current_user: User = Depends(get_current_user),
 ):
-    await admin_check(current_user)
+    await role_check(current_user, Role.ADMIN, "Только администратор имеет доступ к данному эндпоинту")
     new_practice = await qr.create_practice(session, practice_create, current_user.id)
     return new_practice
 

@@ -4,8 +4,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..database import get_session
 from ..auth.queries import get_current_user
-from ..user.models import User
-from ..user.utils import admin_check
+from ..user.models import User, Role
+from ..user.utils import role_check
 
 from . import queries as qr
 from .schemes import ModuleCreate, ModuleWithoutCreator, ModuleInDB
@@ -21,7 +21,7 @@ async def create_module(
     session: AsyncSession = Depends(get_session),
     current_user: User = Depends(get_current_user),
 ):
-    await admin_check(current_user)
+    await role_check(current_user, Role.ADMIN, "Только администратор имеет доступ к данному эндпоинту")
     new_module = await qr.create_module(session, module_create, current_user.id)
     return new_module
 
