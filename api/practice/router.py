@@ -17,9 +17,10 @@ from .schemes import (
     PracticeCreate,
     PracticeWitoutCreator,
     PracticeInDB,
+    GetPracticeFilters,
 )
 
-router = APIRouter(prefix="/practices")
+router = APIRouter(prefix="/practice")
 
 
 @router.post(
@@ -59,7 +60,7 @@ async def get_specialization(
 
 
 @router.post(
-    "/pattern", response_model=PracticePatternInDB, status_code=status.HTTP_201_CREATED
+    "s/pattern", response_model=PracticePatternInDB, status_code=status.HTTP_201_CREATED
 )
 async def create_practice_pattern(
     practice_patteren_create: PracticePatternCreate,
@@ -110,7 +111,7 @@ async def create_practice(
     return new_practice
 
 
-@router.get("", response_model=List[PracticeInDB])
+@router.get("s", response_model=List[PracticeInDB])
 async def get_practices(
     filters: GetPracticeFilters = Depends(),
     session: AsyncSession = Depends(get_session),
@@ -124,7 +125,7 @@ async def get_practices(
 async def get_practice_by_id(
     practice_id: int,
     session: AsyncSession = Depends(get_session),
-    # current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
 ):
     practice = await qr.get_practice_by_id(session, practice_id)
     return practice

@@ -13,6 +13,7 @@ from .schemes import (
     PracticePatternCreate,
     GetPracticePatternsFilters,
     PracticeCreate,
+    GetPracticeFilters,
 )
 from . import validators as validator
 
@@ -48,9 +49,7 @@ async def get_specializations(session: AsyncSession) -> List[Specialization]:
     specializations = result.scalars().all()
 
     if not specializations:
-        raise HTTPException(
-            status_code=status.HTTP_204_NO_CONTENT, detail="Список специальностей пуст"
-        )
+        raise HTTPException(status_code=status.HTTP_204_NO_CONTENT)
 
     return specializations
 
@@ -140,14 +139,11 @@ async def get_practice_patterns(
 
     if not practice_patterns:
         if not filters:
-            raise HTTPException(
-                status_code=status.HTTP_204_NO_CONTENT,
-                detail="Список паттернов пуст или",
-            )
+            raise HTTPException(status_code=status.HTTP_204_NO_CONTENT)
         else:
             raise HTTPException(
-                status_code=status.HTTP_204_NO_CONTENT,
-                detail="Патерный, удовлетворяющие фильтрам не найдены",
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Паттерн(ы), удовлетворяющий(ие) фильтрам не найден(ы)",
             )
 
     return practice_patterns
@@ -204,12 +200,28 @@ async def create_practice(
     return new_practice
 
 
-async def get_practices(session: AsyncSession) -> List[Practice]:
-    result = await session.execute(
-        select(Practice).options(selectinload(Practice.creator))
-    )
+async def get_practices(
+    session: AsyncSession, filters: GetPracticeFilters
+) -> List[Practice]:
+    query = select(Practice)
+    if filters:
+        if filters.pattern_id:
+            query = query.where(Practice.pattern_id == filters.pattern_id)
+        if filters.creator_id:
+            query = query.where(Practice.creator_id == filters.creator_id)
 
+    result = await session.execute(query.options(selectinload(Practice.creator)))
     practices = result.scalars().all()
+
+    if not practices:
+        if not filters:
+            raise HTTPException(status_code=status.HTTP_204_NO_CONTENT)
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Практика(и), удовлетворяющая(ие) фильтрам не найдена(ы)",
+            )
+
     return practices
 
 
@@ -224,8 +236,7 @@ async def get_practice_by_id(session: AsyncSession, practice_id: int) -> Practic
 
     if not practice:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Практика не найдена"
+            status_code=status.HTTP_404_NOT_FOUND, detail="Практика не найдена"
         )
-    
+
     return practice

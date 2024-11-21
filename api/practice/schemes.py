@@ -52,3 +52,8 @@ class PracticeWitoutCreator(PracticeCreate, ID):
 
 class PracticeInDB(PracticeWitoutCreator):
     creator: BaseUser
+
+
+class GetPracticeFilters(BaseModel):
+    pattern_id: Optional[int] = Query(None, description="Патерн Практик")
+    creator_id: Optional[int] = Query(None, description="Создатель практики")
