@@ -2,6 +2,7 @@ from fastapi import FastAPI
 
 from .auth.router import router as authRouter
 from .practice.router import router as practiceRouter
+from .module.router import router as moduleRouter
 
 app = FastAPI(
     title="Polina's Education",
@@ -11,3 +12,4 @@ app = FastAPI(
 
 app.include_router(authRouter, tags=["Auth"])
 app.include_router(practiceRouter, tags=["Practice"])
+app.include_router(moduleRouter, tags=["Module"])

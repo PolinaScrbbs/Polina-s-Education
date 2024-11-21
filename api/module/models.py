@@ -1,6 +1,7 @@
 from datetime import datetime
 import pytz
 from sqlalchemy import (
+    Boolean,
     CheckConstraint,
     Column,
     DateTime,
@@ -31,6 +32,8 @@ class Module(Base):
     id = Column(Integer, primary_key=True)
     title = Column(String(64), nullable=False)
     description = Column(String(256), nullable=False)
+    creator_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    is_mandatory = Column(Boolean, default=True, nullable=False)
 
 
 class ModuleResult(Base):

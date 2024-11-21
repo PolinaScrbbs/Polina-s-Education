@@ -3,12 +3,8 @@ from typing import Optional
 from fastapi import Query
 from pydantic import BaseModel
 
-from ..user.schemes import BaseUser
+from ..user.schemes import ID, BaseUser
 from .models import PracticeType
-
-
-class ID(BaseModel):
-    id: int
 
 
 class SpecializationCreate(BaseModel):
