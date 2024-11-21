@@ -211,3 +211,21 @@ async def get_practices(session: AsyncSession) -> List[Practice]:
 
     practices = result.scalars().all()
     return practices
+
+
+async def get_practice_by_id(session: AsyncSession, practice_id: int) -> Practice:
+    result = await session.execute(
+        select(Practice)
+        .where(Practice.id == practice_id)
+        .options(selectinload(Practice.creator))
+    )
+
+    practice = result.scalar_one_or_none()
+
+    if not practice:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Практика не найдена"
+        )
+    
+    return practice

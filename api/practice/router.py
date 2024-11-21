@@ -23,7 +23,7 @@ router = APIRouter(prefix="/practices")
 
 
 @router.post(
-    "/specialization",
+    "s/specialization",
     response_model=SpecializationInDB,
     status_code=status.HTTP_201_CREATED,
 )
@@ -37,7 +37,7 @@ async def create_specialization(
     return new_specialization
 
 
-@router.get("/specializations", response_model=List[SpecializationInDB])
+@router.get("s/specializations", response_model=List[SpecializationInDB])
 async def get_specializations(
     session: AsyncSession = Depends(get_session),
     current_user: User = Depends(get_current_user),
@@ -46,7 +46,7 @@ async def get_specializations(
     return specializations
 
 
-@router.get("/specialization", response_model=SpecializationInDB)
+@router.get("s/specialization", response_model=SpecializationInDB)
 async def get_specialization(
     id: Optional[int] = None,
     code: Optional[str] = None,
@@ -73,7 +73,7 @@ async def create_practice_pattern(
     return new_practice_pattern
 
 
-@router.get("/patterns", response_model=List[PracticePatternInDB])
+@router.get("s/patterns", response_model=List[PracticePatternInDB])
 async def get_practice_patterns(
     filters: GetPracticePatternsFilters = Depends(),
     session: AsyncSession = Depends(get_session),
@@ -84,7 +84,7 @@ async def get_practice_patterns(
     return practice_patterns
 
 
-@router.get("/pattern", response_model=PracticePatternInDB)
+@router.get("s/pattern", response_model=PracticePatternInDB)
 async def get_practice_pattern_by_id(
     practice_pattern_id: int,
     session: AsyncSession = Depends(get_session),
@@ -112,8 +112,19 @@ async def create_practice(
 
 @router.get("", response_model=List[PracticeInDB])
 async def get_practices(
+    filters: GetPracticeFilters = Depends(),
+    session: AsyncSession = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+):
+    practices = await qr.get_practices(session, filters)
+    return practices
+
+
+@router.get("", response_model=PracticeInDB)
+async def get_practice_by_id(
+    practice_id: int,
     session: AsyncSession = Depends(get_session),
     # current_user: User = Depends(get_current_user),
 ):
-    practices = await qr.get_practices(session)
-    return practices
+    practice = await qr.get_practice_by_id(session, practice_id)
+    return practice
