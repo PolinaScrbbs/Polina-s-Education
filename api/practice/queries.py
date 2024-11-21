@@ -203,6 +203,7 @@ async def create_practice(
 async def get_practices(
     session: AsyncSession, filters: GetPracticeFilters
 ) -> List[Practice]:
+    print(f"ТУТТ {filters}")
     query = select(Practice)
     if filters:
         if filters.pattern_id:

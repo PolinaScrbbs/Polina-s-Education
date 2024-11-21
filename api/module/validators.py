@@ -1,5 +1,3 @@
-from datetime import datetime, timedelta
-from typing import Optional
 from sqlalchemy import select, exists
 from sqlalchemy.ext.asyncio import AsyncSession
 

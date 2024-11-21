@@ -37,6 +37,9 @@ class Module(Base):
     is_mandatory = Column(Boolean, default=True, nullable=False)
 
     creator = relationship("User", back_populates="created_modules")
+    results = relationship(
+        "ModuleResult", back_populates="module", cascade="all, delete-orphan"
+    )
 
 
 class ModuleResult(Base):
@@ -52,6 +55,10 @@ class ModuleResult(Base):
             tzinfo=None
         ),
     )
+
+    module = relationship("Module", back_populates="results")
+    student = relationship("User", back_populates="modules_results")
+
     UniqueConstraint("module_id", "student_id", name="uq_student_module_result")
     CheckConstraint(
         "completed_lessons_count > 0", name="chk_completed_lessons_count_positive"

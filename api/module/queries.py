@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from .models import Module, ModuleResult
 from .schemes import (
+    GetModuleResultFilters,
     ModuleCreate,
 )
 from . import validators as validator
@@ -70,3 +71,25 @@ async def create_module_result(
 
     session.add(new_module_result)
     await session.commit()
+
+
+async def get_results(
+    session: AsyncSession, filters: GetModuleResultFilters
+) -> List[ModuleResult]:
+    query = select(ModuleResult).options(
+        selectinload(ModuleResult.module), selectinload(ModuleResult.student)
+    )
+
+    if filters:
+        if filters.module_id:
+            query = query.where(ModuleResult.module_id == filters.module_id)
+        if filters.student_id:
+            query = query.where(ModuleResult.student_id == filters.student_id)
+
+    result = await session.execute(query)
+    results = result.scalars().all()
+
+    if not results:
+        raise HTTPException(status_code=status.HTTP_204_NO_CONTENT)
+
+    return results

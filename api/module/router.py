@@ -1,5 +1,5 @@
 from typing import List
-from fastapi import Depends, APIRouter, status
+from fastapi import Depends, APIRouter, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..database import get_session
@@ -8,7 +8,13 @@ from ..user.models import User, Role
 from ..user.utils import role_check
 
 from . import queries as qr
-from .schemes import ModuleCreate, ModuleWithoutCreator, ModuleInDB
+from .schemes import (
+    ModuleCreate,
+    ModuleWithoutCreator,
+    ModuleInDB,
+    ModuleResultInDB,
+    GetModuleResultFilters,
+)
 
 router = APIRouter(prefix="/module")
 
@@ -60,3 +66,20 @@ async def create_module_result(
     )
     await qr.create_module_result(session, module_id, current_user.id)
     return f"Вы, {current_user.username}, начали прохождение модуля"
+
+
+@router.get("/results", response_model=List[ModuleResultInDB])
+async def get_results(
+    filters: GetModuleResultFilters = Depends(),
+    session: AsyncSession = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+):
+    if current_user.role == Role.STUDENT:
+        if filters.student_id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Студенты не имеют доступка к чужим результатам",
+            )
+        filters.student_id = current_user.id
+    results = await qr.get_results(session, filters)
+    return results
