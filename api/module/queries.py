@@ -4,10 +4,11 @@ from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from .models import Module
+from .models import Module, ModuleResult
 from .schemes import (
     ModuleCreate,
 )
+from . import validators as validator
 
 
 async def create_module(
@@ -53,3 +54,19 @@ async def get_module_by_id(session: AsyncSession, module_id: int) -> Module:
         )
 
     return module
+
+
+async def create_module_result(
+    session: AsyncSession, module_id: int, current_user_id: int
+) -> None:
+    exist = await validator.module_result_exists(session, module_id, current_user_id)
+
+    if exist:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT, detail="Вы уже начинали этот модуль"
+        )
+
+    new_module_result = ModuleResult(module_id=module_id, student_id=current_user_id)
+
+    session.add(new_module_result)
+    await session.commit()
