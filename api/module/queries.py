@@ -4,6 +4,8 @@ from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from api.user.models import Role
+
 from .models import Module, ModuleResult
 from .schemes import (
     GetModuleResultFilters,
@@ -73,7 +75,7 @@ async def create_module_result(
     await session.commit()
 
 
-async def get_results(
+async def get_module_results(
     session: AsyncSession, filters: GetModuleResultFilters
 ) -> List[ModuleResult]:
     query = select(ModuleResult).options(
@@ -93,3 +95,34 @@ async def get_results(
         raise HTTPException(status_code=status.HTTP_204_NO_CONTENT)
 
     return results
+
+
+async def get_module_result_by_id(
+    session: AsyncSession,
+    module_result_id: int,
+    current_user_id: int,
+    current_user_role: Role,
+) -> ModuleResult:
+    if current_user_role == Role.STUDENT:
+        exist = await validator.student_module_result_exists(
+            session, module_result_id, current_user_id
+        )
+        if not exist:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Студент имеет доступ только к своим результатам",
+            )
+
+    result = await session.execute(
+        select(ModuleResult)
+        .options(selectinload(ModuleResult.module), selectinload(ModuleResult.student))
+        .where(ModuleResult.id == module_result_id)
+    )
+    module_result = result.scalar_one_or_none()
+
+    if not module_result:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Результат модуля не найден"
+        )
+
+    return module_result

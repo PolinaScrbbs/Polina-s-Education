@@ -15,3 +15,16 @@ async def module_result_exists(
     )
     result = await session.scalar(query)
     return result
+
+
+async def student_module_result_exists(
+    session: AsyncSession, module_result_id: int, student_id: int
+) -> bool:
+    query = select(
+        exists().where(
+            ModuleResult.id == module_result_id,
+            ModuleResult.student_id == student_id,
+        )
+    )
+    result = await session.scalar(query)
+    return result
