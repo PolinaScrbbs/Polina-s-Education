@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 from fastapi import Depends, APIRouter, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -26,3 +26,19 @@ async def get_users(
     )
     users = await qr.get_users(session, filters)
     return users
+
+
+@router.get("", response_model=BaseUser)
+async def get_user_by_id(
+    user_id: int,
+    session: AsyncSession = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+):
+    await role_check(
+        current_user,
+        [Role.ADMIN, Role.TEACHER],
+        "Студенты не имеют доступа к данному ендпоинту",
+    )
+
+    user = await qr.get_user_by_id(session, user_id)
+    return user
