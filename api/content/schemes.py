@@ -18,3 +18,8 @@ class ContentWithoutCreator(ContentCreate, ID):
 
 class ContentInDB(ContentWithoutCreator):
     creator: BaseUser
+
+
+class GetContentFilters(BaseModel):
+    title: Optional[str] = None
+    creator_id: Optional[int] = None

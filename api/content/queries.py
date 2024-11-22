@@ -5,7 +5,7 @@ from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from .models import Content
-from .schemes import ContentCreate
+from .schemes import ContentCreate, GetContentFilters
 from . import validators as validator
 
 
@@ -32,6 +32,28 @@ async def create_content(
     await session.commit()
     await session.refresh(new_content)
     return new_content
+
+
+async def get_contents(
+    session: AsyncSession, filters: GetContentFilters
+) -> List[Content]:
+    query = select(Content).options(selectinload(Content.creator))
+
+    if filters.title:
+        query = query.where(Content.title == filters.title)
+    if filters.creator_id:
+        query = query.where(Content.creator_id == filters.creator_id)
+
+    result = await session.execute(query)
+    contents = result.scalars().all()
+
+    if not contents:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Список контента пуст или не найден контент, удовлетворяющий фильтрам",
+        )
+
+    return contents
 
 
 async def get_content_by_id(session: AsyncSession, content_id: int) -> Content:
