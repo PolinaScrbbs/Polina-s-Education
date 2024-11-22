@@ -1,4 +1,7 @@
+from typing import Optional
 from pydantic import BaseModel
+
+from .models import Role
 
 
 class ID(BaseModel):
@@ -12,8 +15,7 @@ class UserCreate(BaseModel):
     full_name: str
 
 
-class BaseUser(BaseModel):
-    id: int
+class BaseUser(ID):
     username: str
     role: str
     full_name: str
@@ -22,3 +24,7 @@ class BaseUser(BaseModel):
 class UserResponse(BaseModel):
     message: str
     user: BaseUser
+
+
+class GetUserFilters(BaseModel):
+    role: Optional[Role] = Role.STUDENT
