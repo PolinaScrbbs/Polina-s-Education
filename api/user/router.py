@@ -42,3 +42,12 @@ async def get_user_by_id(
 
     user = await qr.get_user_by_id(session, user_id)
     return user
+
+
+@router.get("/@{username}", response_model=BaseUser)
+async def get_user_by_username(
+    username: str,
+    session: AsyncSession = Depends(get_session),
+):
+    user = await qr.get_user_by_username(session, username)
+    return user
