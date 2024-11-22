@@ -1,5 +1,5 @@
-from typing import List, Optional
-from fastapi import Depends, APIRouter, HTTPException, status
+from typing import List
+from fastapi import Depends, APIRouter
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..database import get_session
@@ -11,6 +11,18 @@ from . import queries as qr
 from .schemes import BaseUser, GetUserFilters
 
 router = APIRouter(prefix="/user")
+
+
+@router.get("s/roles", response_model=List[Role])
+async def get_roles(
+    current_user: User = Depends(get_current_user),
+):
+    await role_check(
+        current_user,
+        [Role.ADMIN],
+        "Только администраторы имеют доступ к данному ендпоинту",
+    )
+    return await Role.values()
 
 
 @router.get("s", response_model=List[BaseUser])

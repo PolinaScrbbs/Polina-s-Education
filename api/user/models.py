@@ -13,6 +13,12 @@ from config import SECRET_KEY
 from ..database import Base
 
 
+class BaseEnum(BaseEnum):
+    @classmethod
+    async def values(cls):
+        return [member.value for member in cls]
+
+
 class Role(BaseEnum):
     ADMIN = "Администратор"
     TEACHER = "Преподаватель"
