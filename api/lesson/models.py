@@ -12,7 +12,7 @@ from sqlalchemy import (
     UniqueConstraint,
 )
 
-from ..module.models import Base
+from ..content.models import Base
 
 lesson_contents = Table(
     "lesson_contents",
@@ -29,23 +29,6 @@ lesson_result_contents = Table(
     Column("content_id", Integer, ForeignKey("contents.id")),
     UniqueConstraint("lesson_result_id", "content_id", name="uq_lesson_result_content"),
 )
-
-
-class Content(Base):
-    __tablename__ = "contents"
-
-    id = Column(Integer, primary_key=True)
-    title = Column(String(64), nullable=False)
-    description = Column(String(256), nullable=False)
-    file_path = Column(String(128), unique=True, nullable=False)
-    creator_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    created_at = Column(
-        DateTime,
-        default=lambda: datetime.now(pytz.timezone("Europe/Moscow")).replace(
-            tzinfo=None
-        ),
-    )
-    last_updated_at = Column(DateTime, default=None)
 
 
 class LessonType(BaseEnum):
