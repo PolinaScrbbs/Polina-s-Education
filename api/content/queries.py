@@ -32,3 +32,20 @@ async def create_content(
     await session.commit()
     await session.refresh(new_content)
     return new_content
+
+
+async def get_content_by_id(session: AsyncSession, content_id: int) -> Content:
+    result = await session.execute(
+        select(Content)
+        .options(selectinload(Content.creator))
+        .where(Content.id == content_id)
+    )
+
+    content = result.scalar_one_or_none()
+
+    if not content:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Контент не найден"
+        )
+
+    return content

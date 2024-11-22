@@ -1,6 +1,7 @@
 import pytz
 from datetime import datetime
 from sqlalchemy import Column, String, Integer, ForeignKey, DateTime
+from sqlalchemy.orm import relationship
 from ..module.models import Base
 
 
@@ -19,3 +20,5 @@ class Content(Base):
         ),
     )
     last_updated_at = Column(DateTime, default=None)
+
+    creator = relationship("User", back_populates="created_content")
