@@ -98,3 +98,26 @@ async def get_lesson_results(
         )
 
     return lesson_results
+
+
+async def get_lesson_result_by_id(
+    session: AsyncSession, lesson_result_id: int
+) -> LessonResult:
+    result = await session.execute(
+        select(LessonResult)
+        .options(
+            selectinload(LessonResult.lesson),
+            selectinload(LessonResult.student),
+        )
+        .where(LessonResult.id == lesson_result_id)
+    )
+
+    lesson_result = result.scalar_one_or_none()
+
+    if not lesson_result:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Результат урока не найден",
+        )
+
+    return lesson_result
