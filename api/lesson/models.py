@@ -51,6 +51,9 @@ class Lesson(Base):
         secondary="module_lessons",
         back_populates="lessons",
     )
+    contents = relationship(
+        "Content", secondary="lesson_contents", back_populates="lessons"
+    )
     results = relationship(
         "LessonResult", back_populates="lesson", cascade="all, delete-orphan"
     )

@@ -30,6 +30,8 @@ async def get_lessons(session: AsyncSession, filters: GetLessonFilters) -> List[
         query = query.where(Lesson.title == filters.title)
     if filters.type:
         query = query.where(Lesson.type == filters.type)
+    if filters.with_contents is True:
+        query = query.options(selectinload(Lesson.contents))
 
     result = await session.execute(query)
     lessons = result.scalars().all()
@@ -43,8 +45,15 @@ async def get_lessons(session: AsyncSession, filters: GetLessonFilters) -> List[
     return lessons
 
 
-async def get_lesson_by_id(session: AsyncSession, lessons_id: int) -> Lesson:
-    result = await session.execute(select(Lesson).where(Lesson.id == lessons_id))
+async def get_lesson_by_id(
+    session: AsyncSession, lessons_id: int, with_contents: bool
+) -> Lesson:
+    query = select(Lesson).where(Lesson.id == lessons_id)
+
+    if with_contents is True:
+        query = query.options(selectinload(Lesson.contents))
+
+    result = await session.execute(query)
     lesson = result.scalar_one_or_none()
 
     if not lesson:

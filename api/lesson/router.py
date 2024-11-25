@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Union
 from fastapi import Depends, APIRouter, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -12,6 +12,7 @@ from . import queries as qr
 from .schemes import (
     LessonCreate,
     LessonInDB,
+    LessonWithContent,
     GetLessonFilters,
     LessonResultInDB,
     GetLessonResultFilters,
@@ -49,7 +50,7 @@ async def create_lesson(
     return new_lesson
 
 
-@router.get("s", response_model=List[LessonInDB])
+@router.get("s", response_model=List[Union[LessonInDB, LessonWithContent]])
 async def get_lessons(
     filters: GetLessonFilters = Depends(),
     session: AsyncSession = Depends(get_session),
@@ -65,9 +66,10 @@ async def get_lessons(
     return lessons
 
 
-@router.get("", response_model=LessonInDB)
-async def get_lesson(
+@router.get("", response_model=Union[LessonInDB, LessonWithContent])
+async def get_lesson_by_id(
     lesson_id: int,
+    with_contents: bool = False,
     session: AsyncSession = Depends(get_session),
     current_user: User = Depends(get_current_user),
 ):
@@ -77,7 +79,7 @@ async def get_lesson(
         "Студенты не имеют доступа к данному ендпоинту",
     )
 
-    lesson = await qr.get_lesson_by_id(session, lesson_id)
+    lesson = await qr.get_lesson_by_id(session, lesson_id, with_contents)
     return lesson
 
 

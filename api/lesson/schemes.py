@@ -1,8 +1,9 @@
 from datetime import datetime
-from typing import Optional
+from typing import List, Optional
 from pydantic import BaseModel
 
 from ..user.schemes import ID, BaseUser
+from ..content.schemes import ContentWithoutCreator
 from .models import LessonType, LessonResultStatus
 
 
@@ -16,9 +17,14 @@ class LessonInDB(LessonCreate, ID):
     pass
 
 
+class LessonWithContent(LessonInDB):
+    contents: List[ContentWithoutCreator]
+
+
 class GetLessonFilters(BaseModel):
     title: Optional[str] = None
     type: LessonType = LessonType.PRACTICE
+    with_contents: bool = False
 
 
 class LessonResultInDB(ID):

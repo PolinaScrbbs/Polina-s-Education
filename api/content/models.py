@@ -22,6 +22,9 @@ class Content(Base):
     last_updated_at = Column(DateTime, default=None)
 
     creator = relationship("User", back_populates="created_content")
+    lessons = lesson_results = relationship(
+        "Lesson", secondary="lesson_contents", back_populates="contents"
+    )
     lesson_results = relationship(
         "LessonResult", secondary="lesson_result_contents", back_populates="contents"
     )
