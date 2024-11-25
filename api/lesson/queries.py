@@ -1,10 +1,11 @@
 from typing import List
 from fastapi import HTTPException, status
 from sqlalchemy.future import select
+from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from .models import Lesson, LessonResult
-from .schemes import LessonCreate, GetLessonFilters
+from .schemes import LessonCreate, GetLessonFilters, GetLessonResultFilters
 from . import validators as validator
 
 
@@ -68,3 +69,32 @@ async def create_lesson_result(
 
     session.add(new_lesson_result)
     await session.commit()
+
+
+async def get_lesson_results(
+    session: AsyncSession, filters: GetLessonResultFilters
+) -> List[LessonResult]:
+    query = (
+        select(LessonResult)
+        .options(
+            selectinload(LessonResult.lesson),
+            selectinload(LessonResult.student),
+        )
+        .where(LessonResult.lesson_id == filters.lesson_id)
+    )
+
+    if filters.student_id:
+        query = query.where(LessonResult.student_id == filters.student_id)
+    if filters.status:
+        query = query.where(LessonResult.status == filters.status)
+
+    result = await session.execute(query)
+    lesson_results = result.scalars().all()
+
+    if not lesson_results:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Список результатов урока пуст или не найдены результаты урока, удовлетворяющие фильтрам",
+        )
+
+    return lesson_results

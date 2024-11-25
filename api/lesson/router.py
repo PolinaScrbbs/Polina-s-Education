@@ -9,7 +9,13 @@ from ..user.utils import role_check
 
 from .models import LessonType
 from . import queries as qr
-from .schemes import LessonCreate, LessonInDB, GetLessonFilters
+from .schemes import (
+    LessonCreate,
+    LessonInDB,
+    GetLessonFilters,
+    LessonResultInDB,
+    GetLessonResultFilters,
+)
 
 
 router = APIRouter(prefix="/lesson")
@@ -89,3 +95,19 @@ async def create_lesson_result(
 
     await qr.create_lesson_result(session, lesson_id, current_user.id)
     return f"Вы, {current_user.username}, начали прохождение урока"
+
+
+@router.get("/results", response_model=List[LessonResultInDB])
+async def get_lesson_results(
+    filters: GetLessonResultFilters = Depends(),
+    session: AsyncSession = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+):
+    await role_check(
+        current_user,
+        [Role.ADMIN, Role.TEACHER],
+        "Студенты не имеют доступа к данному ендпоинту",
+    )
+
+    lesson_result = await qr.get_lesson_results(session, filters)
+    return lesson_result

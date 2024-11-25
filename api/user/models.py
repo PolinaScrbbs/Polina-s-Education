@@ -46,6 +46,9 @@ class User(Base):
     modules_results = relationship(
         "ModuleResult", back_populates="student", cascade="all, delete-orphan"
     )
+    lessons_results = relationship(
+        "LessonResult", back_populates="student", cascade="all, delete-orphan"
+    )
 
     async def set_password(self, password: str) -> None:
         self.hashed_password = bcrypt.hashpw(

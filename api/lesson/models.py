@@ -77,6 +77,7 @@ class LessonResult(Base):
     UniqueConstraint("lesson_id", "student_id", name="uq_student_lesson_result")
 
     lesson = relationship("Lesson", back_populates="results")
+    student = relationship("User", back_populates="lessons_results")
 
 
 class LessonResultEvaluation(Base):
