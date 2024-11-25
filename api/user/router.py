@@ -11,7 +11,7 @@ from . import queries as qr
 from .schemes import (
     BaseUser,
     GetUserFilters,
-    UserWithModuleResult,
+    ModuleResult,
     GetModuleLessonResultFilters,
     LessonResult,
 )
@@ -71,7 +71,7 @@ async def get_user_by_username(
     return user
 
 
-@router.get("/module/results", response_model=UserWithModuleResult)
+@router.get("/module/results", response_model=List[ModuleResult])
 async def get_modules_results(
     session: AsyncSession = Depends(get_session),
     current_user: User = Depends(get_current_user),
@@ -98,5 +98,7 @@ async def get_module_lessons_results(
         "Только студенты имеют доступ к данному ендпоинту",
     )
 
-    res = await qr.get_module_lessons_results(session, filters, current_user.id)
-    return res
+    module_lessons_result = await qr.get_module_lessons_results(
+        session, filters, current_user.id
+    )
+    return module_lessons_result

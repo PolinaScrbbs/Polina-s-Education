@@ -44,10 +44,6 @@ class ModuleResult(ID):
     created_at: datetime
 
 
-class UserWithModuleResult(BaseUser):
-    module_results: List[ModuleResult]
-
-
 class GetModuleLessonResultFilters(BaseModel):
     module_id: int
     lesson_id: Optional[int] = None
@@ -65,7 +61,7 @@ class Content(ID):
     description: str
     file_path: str
     created_at: datetime
-    last_updated_at: Optional[datetime] 
+    last_updated_at: Optional[datetime]
 
 
 class LessonResult(ID):

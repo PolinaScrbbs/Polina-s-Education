@@ -50,20 +50,26 @@ async def get_user_by_id(session: AsyncSession, id: int) -> User:
     return user
 
 
-async def get_module_results(session: AsyncSession, current_user_id: int) -> User:
+async def get_module_results(
+    session: AsyncSession, current_user_id: int
+) -> List[ModuleResult]:
     result = await session.execute(
-        select(User)
-        .options(selectinload(User.module_results).selectinload(ModuleResult.module))
-        .where(User.id == current_user_id)
+        select(ModuleResult)
+        .options(selectinload(ModuleResult.module))
+        .where(ModuleResult.student_id == current_user_id)
     )
 
-    user_with_module_results = result.scalar_one_or_none()
-    return user_with_module_results
+    module_results = result.scalars().all()
+
+    if not module_results:
+        raise HTTPException(status_code=status.HTTP_204_NO_CONTENT)
+
+    return module_results
 
 
 async def get_module_lessons_results(
     session: AsyncSession, filters: GetModuleLessonResultFilters, current_user_id: int
-):
+) -> List[LessonResult]:
     query = (
         select(LessonResult)
         .options(selectinload(LessonResult.lesson), selectinload(LessonResult.contents))
@@ -82,4 +88,12 @@ async def get_module_lessons_results(
         query = query.where(LessonResult.status == filters.lesson_status)
 
     results = await session.execute(query)
-    return results.scalars().all()
+    lesson_results = results.scalars().all()
+
+    if not lesson_results:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Список ваших результатов по урокам модуля пуст или не найдены по соответсвующим фильтрам",
+        )
+
+    return lesson_results
