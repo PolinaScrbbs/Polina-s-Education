@@ -73,3 +73,19 @@ async def get_lesson(
 
     lesson = await qr.get_lesson_by_id(session, lesson_id)
     return lesson
+
+
+@router.post("/result", status_code=status.HTTP_201_CREATED)
+async def create_lesson_result(
+    lesson_id: int,
+    session: AsyncSession = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+):
+    await role_check(
+        current_user,
+        [Role.STUDENT],
+        "Только студенты имеют доступ к данному ендпоинту",
+    )
+
+    await qr.create_lesson_result(session, lesson_id, current_user.id)
+    return f"Вы, {current_user.username}, начали прохождение урока"

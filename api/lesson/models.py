@@ -10,6 +10,7 @@ from sqlalchemy import (
     Table,
     UniqueConstraint,
 )
+from sqlalchemy.orm import relationship
 
 from ..content.models import Base
 from ..user.models import BaseEnum
@@ -45,6 +46,10 @@ class Lesson(Base):
     description = Column(String(256), nullable=False)
     type = Column(Enum(LessonType), default=LessonType.PRACTICE, nullable=False)
 
+    results = relationship(
+        "LessonResult", back_populates="lesson", cascade="all, delete-orphan"
+    )
+
 
 class LessonResultStatus(BaseEnum):
     SENT = "Отправлено"
@@ -58,7 +63,7 @@ class LessonResult(Base):
 
     id = Column(Integer, primary_key=True)
     lesson_id = Column(Integer, ForeignKey("lessons.id"), nullable=False)
-    student_id = Column(Integer, ForeignKey("lessons.id"), nullable=False)
+    student_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     status = Column(
         Enum(LessonResultStatus), default=LessonResultStatus.SENT, nullable=False
     )
@@ -70,6 +75,8 @@ class LessonResult(Base):
     )
     last_updated_at = Column(DateTime, default=None)
     UniqueConstraint("lesson_id", "student_id", name="uq_student_lesson_result")
+
+    lesson = relationship("Lesson", back_populates="results")
 
 
 class LessonResultEvaluation(Base):

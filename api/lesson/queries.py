@@ -3,8 +3,9 @@ from fastapi import HTTPException, status
 from sqlalchemy.future import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from .models import Lesson
+from .models import Lesson, LessonResult
 from .schemes import LessonCreate, GetLessonFilters
+from . import validators as validator
 
 
 async def create_lesson(session: AsyncSession, lesson_create: LessonCreate) -> Lesson:
@@ -52,3 +53,18 @@ async def get_lesson_by_id(session: AsyncSession, lessons_id: int) -> Lesson:
         )
 
     return lesson
+
+
+async def create_lesson_result(
+    session: AsyncSession, lesson_id: int, student_id: int
+) -> None:
+    exist = await validator.lesson_result_exists(session, lesson_id, student_id)
+    if exist:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT, detail="Вы уже начинали этот урок"
+        )
+
+    new_lesson_result = LessonResult(lesson_id=lesson_id, student_id=student_id)
+
+    session.add(new_lesson_result)
+    await session.commit()
