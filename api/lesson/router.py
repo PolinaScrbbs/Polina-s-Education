@@ -57,3 +57,19 @@ async def get_lessons(
 
     lessons = await qr.get_lessons(session, filters)
     return lessons
+
+
+@router.get("", response_model=LessonInDB)
+async def get_lesson(
+    lesson_id: int,
+    session: AsyncSession = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+):
+    await role_check(
+        current_user,
+        [Role.ADMIN, Role.TEACHER],
+        "Студенты не имеют доступа к данному ендпоинту",
+    )
+
+    lesson = await qr.get_lesson_by_id(session, lesson_id)
+    return lesson

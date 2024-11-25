@@ -39,3 +39,16 @@ async def get_lessons(session: AsyncSession, filters: GetLessonFilters) -> List[
         )
 
     return lessons
+
+
+async def get_lesson_by_id(session: AsyncSession, lessons_id: int) -> Lesson:
+    result = await session.execute(select(Lesson).where(Lesson.id == lessons_id))
+    lesson = result.scalar_one_or_none()
+
+    if not lesson:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Урок не найден",
+        )
+
+    return lesson
