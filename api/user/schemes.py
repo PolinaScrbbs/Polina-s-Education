@@ -1,4 +1,5 @@
-from typing import Optional
+from datetime import datetime
+from typing import List, Optional
 from pydantic import BaseModel
 
 from .models import Role
@@ -28,3 +29,19 @@ class UserResponse(BaseModel):
 
 class GetUserFilters(BaseModel):
     role: Optional[Role] = Role.STUDENT
+
+
+class Module(ID):
+    title: str
+    description: str
+    is_mandatory: bool
+
+
+class ModuleResult(ID):
+    module: Module
+    completed_lessons_count: int
+    created_at: datetime
+
+
+class UserWithModuleResult(BaseUser):
+    module_results: List[ModuleResult]

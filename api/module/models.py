@@ -57,7 +57,7 @@ class ModuleResult(Base):
     )
 
     module = relationship("Module", back_populates="results")
-    student = relationship("User", back_populates="modules_results")
+    student = relationship("User", back_populates="module_results")
 
     UniqueConstraint("module_id", "student_id", name="uq_student_module_result")
     CheckConstraint(

@@ -43,7 +43,7 @@ class User(Base):
     created_content = relationship(
         "Content", back_populates="creator", cascade="all, delete-orphan"
     )
-    modules_results = relationship(
+    module_results = relationship(
         "ModuleResult", back_populates="student", cascade="all, delete-orphan"
     )
     lessons_results = relationship(
