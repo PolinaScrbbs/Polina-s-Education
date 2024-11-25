@@ -66,7 +66,7 @@ async def get_module_lessons_results(
 ):
     query = (
         select(LessonResult)
-        .options(selectinload(LessonResult.lesson))
+        .options(selectinload(LessonResult.lesson), selectinload(LessonResult.contents))
         .join(LessonResult.lesson)
         .join(Lesson.modules)
         .where(

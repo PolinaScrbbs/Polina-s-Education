@@ -83,6 +83,9 @@ class LessonResult(Base):
 
     lesson = relationship("Lesson", back_populates="results")
     student = relationship("User", back_populates="lessons_results")
+    contents = relationship(
+        "Content", secondary="lesson_result_contents", back_populates="lesson_results"
+    )
 
 
 class LessonResultEvaluation(Base):

@@ -60,8 +60,17 @@ class Lesson(ID):
     type: LessonType
 
 
+class Content(ID):
+    title: str
+    description: str
+    file_path: str
+    created_at: datetime
+    last_updated_at: Optional[datetime] 
+
+
 class LessonResult(ID):
     lesson: Lesson
     status: LessonResultStatus
+    contents: List[Content]
     created_at: datetime
     last_updated_at: Optional[datetime]
