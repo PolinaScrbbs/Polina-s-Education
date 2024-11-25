@@ -8,7 +8,13 @@ from .models import User, Role
 from .utils import role_check
 
 from . import queries as qr
-from .schemes import BaseUser, GetUserFilters, UserWithModuleResult
+from .schemes import (
+    BaseUser,
+    GetUserFilters,
+    UserWithModuleResult,
+    GetModuleLessonResultFilters,
+    LessonResult,
+)
 
 router = APIRouter(prefix="/user")
 
@@ -78,3 +84,19 @@ async def get_modules_results(
 
     module_results = await qr.get_module_results(session, current_user.id)
     return module_results
+
+
+@router.get("/module/lessons/results", response_model=List[LessonResult])
+async def get_module_lessons_results(
+    filters: GetModuleLessonResultFilters = Depends(),
+    session: AsyncSession = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+):
+    await role_check(
+        current_user,
+        [Role.STUDENT],
+        "Только студенты имеют доступ к данному ендпоинту",
+    )
+
+    res = await qr.get_module_lessons_results(session, filters, current_user.id)
+    return res

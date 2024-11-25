@@ -37,6 +37,11 @@ class Module(Base):
     is_mandatory = Column(Boolean, default=True, nullable=False)
 
     creator = relationship("User", back_populates="created_modules")
+    lessons = relationship(
+        "Lesson",
+        secondary="module_lessons",
+        back_populates="modules",
+    )
     results = relationship(
         "ModuleResult", back_populates="module", cascade="all, delete-orphan"
     )

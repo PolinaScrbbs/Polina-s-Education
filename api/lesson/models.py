@@ -46,6 +46,11 @@ class Lesson(Base):
     description = Column(String(256), nullable=False)
     type = Column(Enum(LessonType), default=LessonType.PRACTICE, nullable=False)
 
+    modules = relationship(
+        "Module",
+        secondary="module_lessons",
+        back_populates="lessons",
+    )
     results = relationship(
         "LessonResult", back_populates="lesson", cascade="all, delete-orphan"
     )

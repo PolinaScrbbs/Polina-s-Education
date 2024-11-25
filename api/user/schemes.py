@@ -2,6 +2,7 @@ from datetime import datetime
 from typing import List, Optional
 from pydantic import BaseModel
 
+from ..lesson.models import LessonType, LessonResultStatus
 from .models import Role
 
 
@@ -45,3 +46,22 @@ class ModuleResult(ID):
 
 class UserWithModuleResult(BaseUser):
     module_results: List[ModuleResult]
+
+
+class GetModuleLessonResultFilters(BaseModel):
+    module_id: int
+    lesson_id: Optional[int] = None
+    lesson_status: Optional[LessonResultStatus] = None
+
+
+class Lesson(ID):
+    title: str
+    description: str
+    type: LessonType
+
+
+class LessonResult(ID):
+    lesson: Lesson
+    status: LessonResultStatus
+    created_at: datetime
+    last_updated_at: Optional[datetime]
