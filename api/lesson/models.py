@@ -1,5 +1,4 @@
 from datetime import datetime
-from enum import Enum as BaseEnum
 import pytz
 from sqlalchemy import (
     Column,
@@ -13,6 +12,7 @@ from sqlalchemy import (
 )
 
 from ..content.models import Base
+from ..user.models import BaseEnum
 
 lesson_contents = Table(
     "lesson_contents",
