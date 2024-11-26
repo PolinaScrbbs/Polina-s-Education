@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import List, Optional
 from fastapi import HTTPException, status
 import pytz
-from sqlalchemy import insert
+from sqlalchemy import insert, delete
 from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -81,6 +81,17 @@ async def get_specialization(
         )
 
     return specialization
+
+
+async def delete_specialization(session: AsyncSession, specialization_id: int):
+    specialization = await session.get(Specialization, specialization_id)
+    if not specialization:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Специализация не найдена",
+        )
+    await session.delete(specialization)
+    await session.commit()
 
 
 async def create_practice_pattern(
@@ -166,6 +177,17 @@ async def get_practice_pattern_by_id(
     return practice_pattern
 
 
+async def delete_practice_pattern(session: AsyncSession, pattern_id: int):
+    pattern = await session.get(PracticePattern, pattern_id)
+    if not pattern:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Шаблон практики не найден",
+        )
+    await session.delete(pattern)
+    await session.commit()
+
+
 async def create_practice(
     session: AsyncSession, practice_create: PracticeCreate, current_user_id: int
 ) -> Practice:
@@ -244,6 +266,17 @@ async def get_practice_by_id(session: AsyncSession, practice_id: int) -> Practic
     return practice
 
 
+async def delete_practice(session: AsyncSession, practice_id: int):
+    practice = await session.get(Practice, practice_id)
+    if not practice:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Практика не найдена",
+        )
+    await session.delete(practice)
+    await session.commit()
+
+
 async def add_module_to_practice(
     session: AsyncSession,
     current_user_id: int,
@@ -268,4 +301,28 @@ async def add_module_to_practice(
         practice_id=practice_id, module_id=module_id, number=number
     )
     await session.execute(stmt)
+    await session.commit()
+
+
+async def remove_module_from_practice(
+    session: AsyncSession, practice_id: int, module_id: int
+):
+    query = select(practice_modules).where(
+        (practice_modules.c.practice_id == practice_id)
+        & (practice_modules.c.module_id == module_id)
+    )
+    result = await session.execute(query)
+    practice_module = result.scalar_one_or_none()
+
+    if not practice_module:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Модуль в указанной практике не найден",
+        )
+
+    delete_query = delete(practice_modules).where(
+        (practice_modules.c.practice_id == practice_id)
+        & (practice_modules.c.module_id == module_id)
+    )
+    await session.execute(delete_query)
     await session.commit()

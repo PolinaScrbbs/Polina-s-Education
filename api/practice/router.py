@@ -63,6 +63,21 @@ async def get_specialization(
     return specialization
 
 
+@router.delete("s/specialization/{specialization_id}", status_code=status.HTTP_200_OK)
+async def delete_specialization(
+    specialization_id: int,
+    session: AsyncSession = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+):
+    await role_check(
+        current_user,
+        [Role.ADMIN],
+        "Только администратор имеет доступ к данному эндпоинту",
+    )
+    await qr.delete_specialization(session, specialization_id)
+    return {"detail": "Специальность удалена"}
+
+
 @router.post(
     "s/pattern", response_model=PracticePatternInDB, status_code=status.HTTP_201_CREATED
 )
@@ -112,6 +127,21 @@ async def get_practice_pattern_by_id(
     return practice_pattern
 
 
+@router.delete("s/pattern/{pattern_id}", status_code=status.HTTP_200_OK)
+async def delete_practice_pattern(
+    pattern_id: int,
+    session: AsyncSession = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+):
+    await role_check(
+        current_user,
+        [Role.ADMIN],
+        "Только администратор имеет доступ к данному эндпоинту",
+    )
+    await qr.delete_practice_pattern(session, pattern_id)
+    return {"detail": "Паттерн удалён"}
+
+
 @router.post(
     "",
     response_model=PracticeWitoutCreator,
@@ -151,7 +181,22 @@ async def get_practice_by_id(
     return practice
 
 
-@router.post("/add_module", status_code=status.HTTP_201_CREATED)
+@router.delete("/{practice_id}", status_code=status.HTTP_200_OK)
+async def delete_practice(
+    practice_id: int,
+    session: AsyncSession = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+):
+    await role_check(
+        current_user,
+        [Role.ADMIN],
+        "Только администратор имеет доступ к данному эндпоинту",
+    )
+    await qr.delete_practice(session, practice_id)
+    return {"detail": "Практика удалена"}
+
+
+@router.post("/module/add", status_code=status.HTTP_201_CREATED)
 async def add_module_to_practice(
     practice_id: int,
     module_id: int,
@@ -168,4 +213,21 @@ async def add_module_to_practice(
     await qr.add_module_to_practice(
         session, current_user.id, practice_id, module_id, number
     )
-    return "Модуль добавлен в практику"
+    return {"detail": "Модуль добавлен в практику"}
+
+
+@router.delete("/module/remove", status_code=status.HTTP_200_OK)
+async def remove_module_from_practice(
+    practice_id: int,
+    module_id: int,
+    session: AsyncSession = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+):
+    await role_check(
+        current_user,
+        [Role.ADMIN],
+        "Только администратор имеет доступ к данному эндпоинту",
+    )
+
+    await qr.remove_module_from_practice(session, practice_id, module_id)
+    return {"detail": "Модуль удален из практики"}
