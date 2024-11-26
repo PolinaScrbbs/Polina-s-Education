@@ -1,5 +1,6 @@
 from typing import List
 from fastapi import HTTPException, status
+from sqlalchemy import delete
 from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -63,6 +64,21 @@ async def get_lesson_by_id(
         )
 
     return lesson
+
+
+async def delete_lesson(session: AsyncSession, lesson_id: int):
+    query = select(Lesson).where(Lesson.id == lesson_id)
+    result = await session.execute(query)
+    lesson = result.scalar_one_or_none()
+
+    if not lesson:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Урок не найден"
+        )
+
+    delete_query = delete(Lesson).where(Lesson.id == lesson_id)
+    await session.execute(delete_query)
+    await session.commit()
 
 
 async def create_lesson_result(
@@ -130,3 +146,18 @@ async def get_lesson_result_by_id(
         )
 
     return lesson_result
+
+
+async def delete_lesson_result(session: AsyncSession, lesson_result_id: int):
+    query = select(LessonResult).where(LessonResult.id == lesson_result_id)
+    result = await session.execute(query)
+    lesson_result = result.scalar_one_or_none()
+
+    if not lesson_result:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Результат урока не найден"
+        )
+
+    delete_query = delete(LessonResult).where(LessonResult.id == lesson_result_id)
+    await session.execute(delete_query)
+    await session.commit()

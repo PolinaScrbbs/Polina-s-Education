@@ -66,6 +66,22 @@ async def get_lessons(
     return lessons
 
 
+@router.delete("/{lesson_id}", status_code=status.HTTP_200_OK)
+async def delete_lesson(
+    lesson_id: int,
+    session: AsyncSession = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+):
+    await role_check(
+        current_user,
+        [Role.ADMIN, Role.TEACHER],
+        "Студенты не имеют доступа к данному ендпоинту",
+    )
+
+    await qr.delete_lesson(session, lesson_id)
+    return {"detail": "Урок успешно удален"}
+
+
 @router.get("", response_model=Union[LessonInDB, LessonWithContent])
 async def get_lesson_by_id(
     lesson_id: int,
@@ -129,3 +145,19 @@ async def get_lesson_result_by_id(
 
     lesson_result = await qr.get_lesson_result_by_id(session, lesson_result_id)
     return lesson_result
+
+
+@router.delete("/result/{lesson_result_id}", status_code=status.HTTP_200_OK)
+async def delete_lesson_result(
+    lesson_result_id: int,
+    session: AsyncSession = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+):
+    await role_check(
+        current_user,
+        [Role.ADMIN, Role.TEACHER],
+        "Студенты не имеют доступа к данному ендпоинту",
+    )
+
+    await qr.delete_lesson_result(session, lesson_result_id)
+    return {"detail": "Результат урока успешно удален"}
