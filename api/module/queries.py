@@ -131,7 +131,7 @@ async def get_module_result_by_id(
 
 async def add_lesson_to_module(
     session: AsyncSession, current_user_id, module_id: int, lesson_id: int, number: int
-):
+) -> None:
     exist = await validator.module_creator_exists(session, module_id, current_user_id)
     if not exist:
         raise HTTPException(

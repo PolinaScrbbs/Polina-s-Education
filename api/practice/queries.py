@@ -2,11 +2,12 @@ from datetime import datetime
 from typing import List, Optional
 from fastapi import HTTPException, status
 import pytz
+from sqlalchemy import insert
 from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from .models import Practice, Specialization, PracticePattern
+from .models import Practice, Specialization, PracticePattern, practice_modules
 from .schemes import (
     PracticePatternInDB,
     SpecializationCreate,
@@ -241,3 +242,30 @@ async def get_practice_by_id(session: AsyncSession, practice_id: int) -> Practic
         )
 
     return practice
+
+
+async def add_module_to_practice(
+    session: AsyncSession,
+    current_user_id: int,
+    practice_id: int,
+    module_id: int,
+    number: int,
+) -> None:
+    exist = await validator.practice_creator_exists(
+        session, practice_id, current_user_id
+    )
+    if not exist:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Вы не имеете доступа к чужим практикам",
+        )
+
+    await validator.PracticeModulesValidator(
+        practice_id, module_id, number, session
+    ).validate()
+
+    stmt = insert(practice_modules).values(
+        practice_id=practice_id, module_id=module_id, number=number
+    )
+    await session.execute(stmt)
+    await session.commit()

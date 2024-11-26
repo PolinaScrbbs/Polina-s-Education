@@ -149,3 +149,23 @@ async def get_practice_by_id(
 ):
     practice = await qr.get_practice_by_id(session, practice_id)
     return practice
+
+
+@router.post("/add_module", status_code=status.HTTP_201_CREATED)
+async def add_module_to_practice(
+    practice_id: int,
+    module_id: int,
+    number: int,
+    session: AsyncSession = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+):
+    await role_check(
+        current_user,
+        [Role.ADMIN],
+        "Только администратор имеет доступ к данному эндпоинту",
+    )
+
+    await qr.add_module_to_practice(
+        session, current_user.id, practice_id, module_id, number
+    )
+    return "Модуль добавлен в практику"
