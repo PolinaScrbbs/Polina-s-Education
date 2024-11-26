@@ -1,6 +1,6 @@
 from typing import List
 from fastapi import HTTPException, status
-from sqlalchemy import insert
+from sqlalchemy import insert, delete
 from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -58,6 +58,19 @@ async def get_module_by_id(session: AsyncSession, module_id: int) -> Module:
         )
 
     return module
+
+
+async def delete_module(session: AsyncSession, module_id: int):
+    module = await session.execute(select(Module).filter_by(id=module_id))
+    module = module.scalar_one_or_none()
+
+    if not module:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Модуль не найден"
+        )
+
+    await session.delete(module)
+    await session.commit()
 
 
 async def create_module_result(
@@ -129,6 +142,23 @@ async def get_module_result_by_id(
     return module_result
 
 
+async def delete_module_result(
+    session: AsyncSession, module_result_id: int, student_id: int
+):
+    result = await session.execute(
+        select(ModuleResult).filter_by(id=module_result_id, student_id=student_id)
+    )
+    result = result.scalar_one_or_none()
+
+    if not result:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Результат модуля не найден"
+        )
+
+    await session.delete(result)
+    await session.commit()
+
+
 async def add_lesson_to_module(
     session: AsyncSession, current_user_id, module_id: int, lesson_id: int, number: int
 ) -> None:
@@ -147,4 +177,27 @@ async def add_lesson_to_module(
         module_id=module_id, lesson_id=lesson_id, number=number
     )
     await session.execute(stmt)
+    await session.commit()
+
+
+async def remove_lesson_from_module(
+    session: AsyncSession, module_id: int, lesson_id: int
+):
+    query = select(module_lessons).where(
+        (module_lessons.c.module_id == module_id)
+        & (module_lessons.c.lesson_id == lesson_id)
+    )
+    result = await session.execute(query)
+    module_lesson = result.scalar_one_or_none()
+
+    if not module_lesson:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Урок не найден в модуле"
+        )
+
+    delete_query = delete(module_lessons).where(
+        (module_lessons.c.module_id == module_id)
+        & (module_lessons.c.lesson_id == lesson_id)
+    )
+    await session.execute(delete_query)
     await session.commit()

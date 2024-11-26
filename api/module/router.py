@@ -55,6 +55,21 @@ async def get_module_by_id(
     return module
 
 
+@router.delete("/{module_id}", status_code=status.HTTP_200_OK)
+async def delete_module(
+    module_id: int,
+    session: AsyncSession = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+):
+    await role_check(
+        current_user,
+        [Role.ADMIN],
+        "Только администратор имеет доступ к данному эндпоинту",
+    )
+    await qr.delete_module(session, module_id)
+    return {"detail": "Модуль удален"}
+
+
 @router.post("/result", status_code=status.HTTP_201_CREATED)
 async def create_module_result(
     module_id: int,
@@ -85,6 +100,21 @@ async def get_module_results(
     return results
 
 
+@router.delete("/result/{module_result_id}", status_code=status.HTTP_200_OK)
+async def delete_module_result(
+    module_result_id: int,
+    session: AsyncSession = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+):
+    await role_check(
+        current_user,
+        [Role.STUDENT],
+        "Только студент имеет доступ к удалению своих результатов",
+    )
+    await qr.delete_module_result(session, module_result_id, current_user.id)
+    return {"detail": "Результат модуля удален"}
+
+
 @router.get("/result", response_model=ModuleResultInDB)
 async def get_module_result_by_id(
     module_result_id: int,
@@ -97,7 +127,7 @@ async def get_module_result_by_id(
     return module_result
 
 
-@router.post("/add_lesson", status_code=status.HTTP_201_CREATED)
+@router.post("/lesson/add", status_code=status.HTTP_201_CREATED)
 async def add_lesson_to_module(
     module_id: int,
     lesson_id: int,
@@ -114,3 +144,18 @@ async def add_lesson_to_module(
     )
 
     return "Урок добавлен в модуль"
+
+
+@router.delete("/lesson/remove", status_code=status.HTTP_200_OK)
+async def remove_lesson_from_module(
+    module_id: int,
+    lesson_id: int,
+    session: AsyncSession = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+):
+    await role_check(
+        current_user, [Role.TEACHER], "Только учителя имеют доступ к данному эндпоинту"
+    )
+
+    await qr.remove_lesson_from_module(session, module_id, lesson_id)
+    return {"detail": "Урок удален из модуля"}
