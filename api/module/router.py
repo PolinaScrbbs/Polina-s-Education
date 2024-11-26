@@ -95,3 +95,22 @@ async def get_module_result_by_id(
         session, module_result_id, current_user.id, current_user.role
     )
     return module_result
+
+
+@router.post("/add_lesson", status_code=status.HTTP_201_CREATED)
+async def add_lesson_to_module(
+    module_id: int,
+    lesson_id: int,
+    number: int,
+    session: AsyncSession = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+):
+    await role_check(
+        current_user, [Role.TEACHER], "Только учителя имеют доступ к данному эндпоинту"
+    )
+
+    await qr.add_lesson_to_module(
+        session, current_user.id, module_id, lesson_id, number
+    )
+
+    return "Урок добавлен в модуль"

@@ -1,12 +1,13 @@
 from typing import List
 from fastapi import HTTPException, status
+from sqlalchemy import insert
 from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.user.models import Role
 
-from .models import Module, ModuleResult
+from .models import Module, ModuleResult, module_lessons
 from .schemes import (
     GetModuleResultFilters,
     ModuleCreate,
@@ -126,3 +127,24 @@ async def get_module_result_by_id(
         )
 
     return module_result
+
+
+async def add_lesson_to_module(
+    session: AsyncSession, current_user_id, module_id: int, lesson_id: int, number: int
+):
+    exist = await validator.module_creator_exists(session, module_id, current_user_id)
+    if not exist:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Вы не имеете доступа к чужим модулям",
+        )
+
+    await validator.ModuleLessonsValidator(
+        module_id, lesson_id, number, session
+    ).validate()
+
+    stmt = insert(module_lessons).values(
+        module_id=module_id, lesson_id=lesson_id, number=number
+    )
+    await session.execute(stmt)
+    await session.commit()
