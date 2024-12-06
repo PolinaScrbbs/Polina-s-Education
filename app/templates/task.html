@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/null.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Sometype+Mono:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header class="header">
+        <div class="header__container container">
+            <div class="header__items">
+                <div class="header__item">
+                    <div class="header__logo">Blueberries</div>
+                </div>
+                <div class="header__item header__menu">
+                    <div class="header__aside">
+                        <div class="header__links">
+                            <a href="#" class="header__link active-link">Practice</a>
+                            <a href="#" class="header__link">Results</a>
+                            <a href="#" class="header__link">Results</a>
+                            <a href="#" class="header__link">Results</a>
+                        </div>
+                        <div class="header__profile">
+                            <img src="imgs/header/profile.png" class="header__profileIcon">
+                            <div class="header__name">Username</div>
+                        </div>
+                    </div>
+                    <button class="burger__close">
+                        x
+                    </button>
+                </div>
+                <div class="header__item header__burger" >
+                    <button class="burger">
+                        <img src="imgs/header/burger.svg" alt="">
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+    <main>
+        <div class="container">
+            <div class="tasks">
+                <div class="tasks__modules">
+                    <details class="details">
+                        <summary class="details__title">Module 1</summary>
+                        <div class="details__content">
+                            <button class="details__btn" data-task="task-1-1">Task 1</button>
+                            <button class="details__btn" data-task="task-1-2">Task 2</button>
+                        </div>
+                    </details>
+                    <details class="details">
+                        <summary class="details__title">Module 2</summary>
+                        <div class="details__content">
+                            <button class="details__btn" data-task="task-2-1">Task 1</button>
+                            <button class="details__btn" data-task="task-2-2">Task 2</button>
+                        </div>
+                    </details>
+                    <details class="details">
+                        <summary class="details__title">Module 3</summary>
+                        <div class="details__content">
+                            <button class="details__btn" data-task="task-3-1">Task 1</button>
+                            <button class="details__btn" data-task="task-3-2">Task 2</button>
+                        </div>
+                    </details>
+                </div>
+                <div id="tasks-content" class="tasks__content">
+                    <div class="task-content task" id="task-1-1" style="display: none;">
+                        <div class="task__title">
+                            Class aptent taciti sociosqu ad litora torquent per conubia nostra
+                        </div>
+                        <div class="task__description">
+                            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla a dignissim erat, eget tempus risus. Curabitur suscipit quis ex sit amet euismod. Mauris dictum a nulla in aliquam. Nullam sed purus sed ex porta aliquam vitae sed magna. Ut cursus dolor quis sapien hendrerit porttitor. Nam ultrices ullamcorper euismod. Phasellus vitae iaculis risus, id ullamcorper mi. Mauris non fermentum elit, non dapibus sem. Aenean volutpat mi aliquam, varius nibh eu, dictum orci. 
+                        </div>
+                        <div class="task__files">
+                            <div class="task__file">
+                                <img src="imgs/task/excel.svg" alt="">
+                                <div class="task__fileName">File 1</div>
+                            </div>
+                            <div class="task__file">
+                                <img src="imgs/task/excel.svg" alt="">
+                                <div class="task__fileName">File 1</div>
+                            </div>
+                            <div class="task__file">
+                                <img src="imgs/task/excel.svg" alt="">
+                                <div class="task__fileName">File 1</div>
+                            </div>
+                        </div>
+                        <div class="task__upload">
+                            <label for="images" class="drop-container" id="dropcontainer">
+                                <span class="drop-title">+ Add result</span>
+                                <input type="file" id="images" accept="image/*" required>
+                              </label>
+                              <div id="file-names"></div>
+                        </div>
+                        <div class="task__btns">
+                            <button class="task__btn">Save</button>
+                            <button class="task__btn">Edit</button>
+                        </div>
+                    </div>
+                    <div class="task-content task" id="task-1-2" style="display: none;">Content for Task 2 of Module 1</div>
+                    <div class="task-content task" id="task-2-1" style="display: none;">Content for Task 1 of Module 2</div>
+                    <div class="task-content task" id="task-2-2" style="display: none;">Content for Task 2 of Module 2</div>
+                    <div class="task-content task" id="task-3-1" style="display: none;">Content for Task 1 of Module 3</div>
+                    <div class="task-content task" id="task-3-2" style="display: none;">Content for Task 2 of Module 3</div>
+                </div>
+            </div>
+        </div>
+    </main>
+    <footer class="footer">
+        <div class="footer__container container">
+            <div class="footer__items">
+                <div class="footer__item">
+                    <div class="footer__icons">
+                        <div class="footer__icon">
+                            <img src="imgs/header/github.svg" alt="">
+                        </div>
+                        <div class="footer__icon">
+                            <img src="imgs/header/vk.svg" alt="">
+                        </div>
+                    </div>
+                </div>
+                <div class="footer__item">
+                    <div class="footer__powered">Powered by PolinaScrbbs & Light2d </div>
+    
+                </div>
+                <div class="footer__item">
+                    <div class="footer__links">
+                        <div class="footer__link">About</div>
+                        <div class="footer__link">About</div>
+                        <div class="footer__link">About</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+    <script src="js/task.js"></script>
+    <script src="js/burger.js"></script>
+</body>
+</html>
