@@ -18,17 +18,19 @@
                     <div class="login__title">Blueberries</div>
                     <div class="login__form loginForm">
                         <div class="loginForm__title">Log in to your account</div>
-                        <div class="loginForm__field">
-                            <div class="loginForm__suptitle">Username</div>
-                            <input type="text" placeholder="Username" class="loginForm__input">
-                        </div>
-                        <div class="loginForm__field">
-                            <div class="loginForm__suptitle">Password</div>
-                            <input type="text" placeholder="Your password" class="loginForm__input">
-                        </div>
-                        <button class="loginForm__button">Login</button>
-                        <div class="loginForm__have">Need a account? <a href="{{ url_for('auth.registration') }}"><span>Sign up</span></a></div>
-                        <div class="loginForm__have">Forgot your password? <span> Reset it</span></div>
+                        <form method="POST" action="{{ url_for('auth.login') }}">
+                            <div class="loginForm__field">
+                                <div class="loginForm__suptitle">Username</div>
+                                <input type="text" placeholder="Username" class="loginForm__input" name="username" value="{{ username }}" required>
+                            </div>
+                            <div class="loginForm__field">
+                                <div class="loginForm__suptitle">Password</div>
+                                <input type="password" placeholder="Your password" class="loginForm__input" name="password" required>
+                            </div>
+                            <button type="submit" class="loginForm__button">Login</button>
+                        </form>
+                        <div class="loginForm__have">Need an account? <a href="{{ url_for('auth.registration') }}"><span>Sign up</span></a></div>
+                        <div class="loginForm__have">Forgot your password?<span>Reset it</span></div>
                     </div>
                 </div>
                 <div class="login__item">
