@@ -46,6 +46,13 @@ async def get_users(
     return users
 
 
+@router.get("/me", response_model=BaseUser)
+async def get_me(
+    current_user: User = Depends(get_current_user),
+):
+    return current_user
+
+
 @router.get("", response_model=BaseUser)
 async def get_user_by_id(
     user_id: int,
