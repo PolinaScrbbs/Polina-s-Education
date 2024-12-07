@@ -6,7 +6,8 @@ from sqlalchemy.sql import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..auth.validators import ValidateError
-from .models import Specialization, PracticePattern, Practice, practice_modules
+from ..group.models import Specialization
+from .models import PracticePattern, Practice, practice_modules
 
 
 class PracticeModulesValidator:

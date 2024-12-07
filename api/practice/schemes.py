@@ -7,15 +7,6 @@ from ..user.schemes import ID, BaseUser
 from .models import PracticeType
 
 
-class SpecializationCreate(BaseModel):
-    code: str
-    title: str
-
-
-class SpecializationInDB(SpecializationCreate, ID):
-    pass
-
-
 class PracticePatternCreate(BaseModel):
     type: PracticeType = PracticeType.EDUCATIONAL_PRACTICE
     specialization_id: int

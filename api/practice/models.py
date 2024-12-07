@@ -14,7 +14,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import relationship
 
-from ..user.models import Base
+from ..group.models import Base
 
 practice_developers = Table(
     "practice_developers",
@@ -39,14 +39,6 @@ practice_modules = Table(
 class PracticeType(BaseEnum):
     EDUCATIONAL_PRACTICE = "Учебная практика"
     PRODUCTION_PRACTICE = "Производственная практика"
-
-
-class Specialization(Base):
-    __tablename__ = "specializations"
-
-    id = Column(Integer, primary_key=True)
-    code = Column(String(7), unique=True)
-    title = Column(String(50), unique=True, nullable=False)
 
 
 class PracticePattern(Base):
