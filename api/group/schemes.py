@@ -4,6 +4,7 @@ from ..user.schemes import ID
 
 
 class SpecializationCreate(BaseModel):
+    code: str
     title: str
 
 

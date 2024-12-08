@@ -48,10 +48,11 @@ async def get_specializations(
 async def get_specialization(
     id: Optional[int] = None,
     title: Optional[str] = None,
+    code: Optional[str] = None,
     session: AsyncSession = Depends(get_session),
     current_user: User = Depends(get_current_user),
 ):
-    specialization = await qr.get_specialization(session, id, title)
+    specialization = await qr.get_specialization(session, id, code, title)
     return specialization
 
 

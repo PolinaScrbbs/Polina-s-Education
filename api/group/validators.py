@@ -4,6 +4,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from ..group.models import Specialization
 
 
+async def specialization_exists_by_code(
+    session: AsyncSession, code: str = None
+) -> bool:
+    query = select(exists().where(Specialization.code == code))
+    result = await session.scalar(query)
+    return result
+
+
 async def specialization_exists_by_title(
     session: AsyncSession, title: str = None
 ) -> bool:

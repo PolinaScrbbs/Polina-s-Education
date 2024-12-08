@@ -6,6 +6,7 @@ from sqlalchemy import (
     UniqueConstraint,
     CheckConstraint,
 )
+from sqlalchemy.orm import relationship
 from ..user.models import Base
 
 
@@ -13,7 +14,12 @@ class Specialization(Base):
     __tablename__ = "specializations"
 
     id = Column(Integer, primary_key=True)
+    code = Column(String(3), unique=True, nullable=False)
     title = Column(String(50), unique=True, nullable=False)
+
+    groups = relationship(
+        "Group", back_populates="specialization", cascade="all, delete-orphan"
+    )
 
 
 class Group(Base):
@@ -25,6 +31,13 @@ class Group(Base):
         Integer, ForeignKey("specializations.id"), nullable=False
     )
     course = Column(Integer, default=3, nullable=False)
+    director_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+
+    director = relationship("User", back_populates="controlled_groups")
+    specialization = relationship("Specialization", back_populates="groups")
+    students = relationship(
+        "User", back_populates="group", cascade="all, delete-orphan"
+    )
 
     __table_args__ = (
         UniqueConstraint(

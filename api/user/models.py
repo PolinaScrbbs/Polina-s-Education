@@ -33,7 +33,12 @@ class User(Base):
     hashed_password = Column(String(512), nullable=False)
     full_name = Column(String(50), nullable=False)
     role = Column(Enum(Role), default=Role.STUDENT, nullable=False)
+    group_id = Column(Integer, ForeignKey("groups.id"), default=None)
 
+    group = relationship("Group", back_populates="students")
+    controlled_groups = relationship(
+        "Group", back_populates="director", cascade="all, delete-orphan"
+    )
     created_practices = relationship(
         "Practice", back_populates="creator", cascade="all, delete-orphan"
     )

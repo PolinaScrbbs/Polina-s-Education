@@ -13,6 +13,16 @@ from . import validators as validator
 async def create_specialization(
     session: AsyncSession, specialization_create: SpecializationCreate
 ) -> Specialization:
+    exist = await validator.specialization_exists_by_code(
+        session, specialization_create.code
+    )
+
+    if exist:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Cпециальность с таким кодом уже существует",
+        )
+
     exist = await validator.specialization_exists_by_title(
         session, specialization_create.title
     )
@@ -23,7 +33,9 @@ async def create_specialization(
             detail="Cпециальность с таким названием уже существует",
         )
 
-    new_specialization = Specialization(title=specialization_create.title)
+    new_specialization = Specialization(
+        code=specialization_create.code, title=specialization_create.title
+    )
 
     session.add(new_specialization)
     await session.commit()
@@ -45,7 +57,7 @@ async def get_specializations(session: AsyncSession) -> List[Specialization]:
 
 
 async def get_specialization(
-    session: AsyncSession, id: Optional[int], title: Optional[str]
+    session: AsyncSession, id: Optional[int], code: Optional[int], title: Optional[str]
 ) -> Specialization:
     if not any([id, title]):
         raise HTTPException(
@@ -56,6 +68,8 @@ async def get_specialization(
     query = select(Specialization)
     if id:
         query = query.where(Specialization.id == id)
+    elif code:
+        query = query.where(Specialization.code == code)
     elif title:
         query = query.where(Specialization.title == title)
 
