@@ -13,6 +13,7 @@ from .schemes import (
     SpecializationInDB,
     GroupCreate,
     GroupWithOutStudents,
+    SpecializationWithGroups,
 )
 
 router = APIRouter(prefix="/group")
@@ -89,3 +90,12 @@ async def create_group(
 
     new_group = await qr.create_group(session, group_create, current_user.id)
     return new_group
+
+
+@router.get("s/", response_model=List[SpecializationWithGroups])
+async def get_groups(
+    session: AsyncSession = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+):
+    groups = await qr.get_groups(session)
+    return groups

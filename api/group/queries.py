@@ -1,12 +1,20 @@
 from typing import List, Optional
 from fastapi import HTTPException, status
 from sqlalchemy import func
+from sqlalchemy.orm import selectinload
 from sqlalchemy.future import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..user.queries import get_user_by_id
 from .models import Group, Specialization
-from .schemes import SpecializationCreate, GroupCreate, GroupWithOutStudents
+from .schemes import (
+    BaseUser,
+    GroupWithOutSpecialization,
+    SpecializationCreate,
+    GroupCreate,
+    GroupWithOutStudents,
+    SpecializationWithGroups,
+)
 from . import validators as validator
 
 
@@ -137,3 +145,41 @@ async def create_group(
     director = await get_user_by_id(session, group_create.director_id)
 
     return await validator.group_to_pydantic(new_group, specialization.title, director)
+
+
+async def get_groups(session: AsyncSession):
+    result = await session.execute(
+        select(Specialization).options(
+            selectinload(Specialization.groups).selectinload(Group.director)
+        )
+    )
+
+    specializations = result.scalars().all()
+
+    if not specializations:
+        raise HTTPException(
+            status_code=status.HTTP_204_NO_CONTENT,
+        )
+
+    specializations_data = [
+        SpecializationWithGroups(
+            title=spec.title,
+            groups=[
+                GroupWithOutSpecialization(
+                    id=group.id,
+                    number=group.number,
+                    course=group.course,
+                    director=BaseUser(
+                        id=group.director.id,
+                        username=group.director.username,
+                        role=group.director.role,
+                        full_name=group.director.full_name,
+                    ),
+                )
+                for group in spec.groups
+            ],
+        )
+        for spec in specializations
+    ]
+
+    return specializations_data

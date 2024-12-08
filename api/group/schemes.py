@@ -29,3 +29,14 @@ class GroupWithOutStudents(ID):
 
 class GroupWithStudents(GroupWithOutStudents):
     students: List[BaseUser]
+
+
+class GroupWithOutSpecialization(ID):
+    number: str
+    course: int
+    director: BaseUser
+
+
+class SpecializationWithGroups(BaseModel):
+    title: str
+    groups: List[GroupWithOutSpecialization]
