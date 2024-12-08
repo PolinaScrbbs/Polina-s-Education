@@ -6,7 +6,60 @@ from sqlalchemy.sql import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..auth.validators import ValidateError
-from .models import Practice, practice_modules
+from .models import Practice, group_practice, practice_modules
+
+
+class GroupPracticeValidator:
+    def __init__(
+        self,
+        group_id: int,
+        practice_id: int,
+        session: AsyncSession,
+    ) -> None:
+        self.group_id = group_id
+        self.practice_id = practice_id
+        self.session = session
+
+    async def validate(self):
+        try:
+            await self.validate_group_id()
+            await self.validate_practice_id()
+            await self.validate_unique_constraints()
+        except ValidateError as e:
+            raise HTTPException(status_code=e.status_code, detail=e.detail)
+
+    async def validate_group_id(self):
+        exists = await self._entity_exists("groups", self.group_id)
+        if not exists:
+            raise ValidateError(
+                f"Группа с id {self.group_id} не найдена.",
+                status.HTTP_404_NOT_FOUND,
+            )
+
+    async def validate_practice_id(self):
+        exists = await self._entity_exists("practices", self.practice_id)
+        if not exists:
+            raise ValidateError(
+                f"Практика с id {self.practice_id} не найдена.",
+                status.HTTP_404_NOT_FOUND,
+            )
+
+    async def validate_unique_constraints(self):
+        query = select(1).where(
+            (group_practice.c.group_id == self.group_id)
+            & (group_practice.c.practice_id == self.practice_id)
+        )
+        result = await self.session.execute(query)
+        if result.scalar():
+            raise ValidateError(
+                f"Связь группы с id {self.group_id} и практики с id {self.practice_id} уже существует.",
+                status.HTTP_409_CONFLICT,
+            )
+
+    async def _entity_exists(self, table_name: str, entity_id: int) -> bool:
+        query = text(f"SELECT 1 FROM {table_name} WHERE id = :id LIMIT 1")
+        result = await self.session.execute(query, {"id": entity_id})
+        return result.scalar() is not None
 
 
 class PracticeModulesValidator:

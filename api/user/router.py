@@ -7,7 +7,7 @@ from ..auth.queries import get_current_user
 from .models import User, Role
 from .utils import role_check
 
-from ..group.queries import get_group_with_practices
+from ..group.queries import get_group_with_practices as qr_get_group_with_practices
 from ..group.schemes import GroupWithPractices
 from . import queries as qr
 from .schemes import (
@@ -80,8 +80,8 @@ async def get_user_by_username(
     return user
 
 
-@router.get("/group/practices", response_model=List[GroupWithPractices])
-async def get_group_practices(
+@router.get("/group/practices", response_model=GroupWithPractices)
+async def get_group_with_practices(
     session: AsyncSession = Depends(get_session),
     current_user: User = Depends(get_current_user),
 ):
@@ -91,8 +91,8 @@ async def get_group_practices(
         "Только студенты имеют доступ к данному ендпоинту",
     )
 
-    practices = await get_group_with_practices(session, current_user.group_id)
-    return practices
+    group = await qr_get_group_with_practices(session, current_user.group_id)
+    return group
 
 
 @router.get("/module/results", response_model=List[ModuleResult])

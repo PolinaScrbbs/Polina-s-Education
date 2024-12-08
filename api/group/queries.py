@@ -186,7 +186,7 @@ async def get_groups(session: AsyncSession):
     return specializations_data
 
 
-async def get_group_with_practices(session: AsyncSession, group_id: int):
+async def get_group_with_practices(session: AsyncSession, group_id: int) -> Group:
     result = await session.execute(
         select(Group)
         .options(
@@ -197,9 +197,9 @@ async def get_group_with_practices(session: AsyncSession, group_id: int):
         .where(Group.id == group_id)
     )
 
-    practices = result.scalars().all()
+    group = result.scalar_one_or_none()
 
-    if not practices:
+    if not group:
         raise HTTPException(status_code=status.HTTP_204_NO_CONTENT)
 
-    return practices
+    return group

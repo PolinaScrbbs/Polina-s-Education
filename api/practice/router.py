@@ -72,6 +72,23 @@ async def delete_practice(
     return {"detail": "Практика удалена"}
 
 
+@router.post("/group/add", status_code=status.HTTP_201_CREATED)
+async def add_practice_to_group(
+    group_id: int,
+    practice_id: int,
+    session: AsyncSession = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+):
+    await role_check(
+        current_user,
+        [Role.ADMIN],
+        "Только администратор имеет доступ к данному эндпоинту",
+    )
+
+    await qr.add_practice_to_group(session, group_id, practice_id)
+    return {"detail": "Практика добавлена к группе"}
+
+
 @router.post("/module/add", status_code=status.HTTP_201_CREATED)
 async def add_module_to_practice(
     practice_id: int,

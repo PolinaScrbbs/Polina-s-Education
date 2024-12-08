@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List, Optional
+from typing import List
 from fastapi import HTTPException, status
 import pytz
 from sqlalchemy import insert, delete
@@ -7,7 +7,7 @@ from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from .models import Practice, practice_modules
+from .models import Practice, group_practice, practice_modules
 from .schemes import (
     PracticeCreate,
     GetPracticeFilters,
@@ -21,7 +21,6 @@ async def create_practice(
     exist = await validator.practice_create_validate(
         session,
         practice_create.title,
-        practice_create.pattern_id,
         (
             practice_create.start_at
             if practice_create.start_at
@@ -38,7 +37,7 @@ async def create_practice(
     new_practice = Practice(
         title=practice_create.title,
         description=practice_create.description,
-        pattern_id=practice_create.pattern_id,
+        type=practice_create.type,
         creator_id=current_user_id,
         start_at=practice_create.start_at,
         end_at=practice_create.end_at,
@@ -56,8 +55,6 @@ async def get_practices(
     print(f"ТУТТ {filters}")
     query = select(Practice)
     if filters:
-        if filters.pattern_id:
-            query = query.where(Practice.pattern_id == filters.pattern_id)
         if filters.creator_id:
             query = query.where(Practice.creator_id == filters.creator_id)
 
@@ -101,6 +98,19 @@ async def delete_practice(session: AsyncSession, practice_id: int):
             detail="Практика не найдена",
         )
     await session.delete(practice)
+    await session.commit()
+
+
+async def add_practice_to_group(
+    session: AsyncSession,
+    group_id: int,
+    practice_id: int,
+) -> None:
+
+    await validator.GroupPracticeValidator(group_id, practice_id, session).validate()
+
+    stmt = insert(group_practice).values(group_id=group_id, practice_id=practice_id)
+    await session.execute(stmt)
     await session.commit()
 
 
