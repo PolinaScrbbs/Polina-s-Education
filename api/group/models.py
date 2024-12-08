@@ -44,6 +44,11 @@ class Group(Base):
         foreign_keys="[User.group_id]",
         cascade="all, delete-orphan",
     )
+    practices = relationship(
+        "Practice",
+        secondary="group_practice",
+        back_populates="groups",
+    )
 
     __table_args__ = (
         CheckConstraint("course >= 2 AND course <= 4", name="check_course_range"),

@@ -16,6 +16,14 @@ from sqlalchemy.orm import relationship
 
 from ..group.models import Base
 
+group_practice = Table(
+    "group_practice",
+    Base.metadata,
+    Column("group_id", Integer, ForeignKey("groups.id"), nullable=False),
+    Column("practice_id", Integer, ForeignKey("practices.id"), nullable=False),
+    UniqueConstraint("group_id", "practice_id", name="uq_group_practice"),
+)
+
 practice_developers = Table(
     "practice_developers",
     Base.metadata,
@@ -41,26 +49,15 @@ class PracticeType(BaseEnum):
     PRODUCTION_PRACTICE = "Производственная практика"
 
 
-class PracticePattern(Base):
-    __tablename__ = "practice_patterns"
-
-    id = Column(Integer, primary_key=True)
-    type = Column(
-        Enum(PracticeType), default=PracticeType.EDUCATIONAL_PRACTICE, nullable=False
-    )
-    specialization_id = Column(
-        Integer, ForeignKey("specializations.id"), nullable=False
-    )
-    course_number = Column(Integer, default=3, nullable=False)
-
-
 class Practice(Base):
     __tablename__ = "practices"
 
     id = Column(Integer, primary_key=True)
     title = Column(String(64), nullable=False)
     description = Column(String(256), nullable=False)
-    pattern_id = Column(Integer, ForeignKey("practice_patterns.id"), nullable=False)
+    type = Column(
+        Enum(PracticeType), default=PracticeType.EDUCATIONAL_PRACTICE, nullable=False
+    )
     creator_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     start_at = Column(
         DateTime,
@@ -76,3 +73,8 @@ class Practice(Base):
     )
 
     creator = relationship("User", back_populates="created_practices")
+    groups = relationship(
+        "Group",
+        secondary="group_practice",
+        back_populates="practices",
+    )

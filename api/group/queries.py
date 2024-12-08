@@ -6,6 +6,7 @@ from sqlalchemy.future import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..user.queries import get_user_by_id
+from ..practice.models import Practice
 from .models import Group, Specialization
 from .schemes import (
     BaseUser,
@@ -183,3 +184,22 @@ async def get_groups(session: AsyncSession):
     ]
 
     return specializations_data
+
+
+async def get_group_with_practices(session: AsyncSession, group_id: int):
+    result = await session.execute(
+        select(Group)
+        .options(
+            selectinload(Group.director),
+            selectinload(Group.specialization),
+            selectinload(Group.practices).selectinload(Practice.creator),
+        )
+        .where(Group.id == group_id)
+    )
+
+    practices = result.scalars().all()
+
+    if not practices:
+        raise HTTPException(status_code=status.HTTP_204_NO_CONTENT)
+
+    return practices

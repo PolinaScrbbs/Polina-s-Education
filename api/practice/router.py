@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List
 from fastapi import Depends, APIRouter, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -9,9 +9,6 @@ from ..user.utils import role_check
 
 from . import queries as qr
 from .schemes import (
-    PracticePatternCreate,
-    PracticePatternInDB,
-    GetPracticePatternsFilters,
     PracticeCreate,
     PracticeWitoutCreator,
     PracticeInDB,
@@ -19,70 +16,6 @@ from .schemes import (
 )
 
 router = APIRouter(prefix="/practice")
-
-
-@router.post(
-    "s/pattern", response_model=PracticePatternInDB, status_code=status.HTTP_201_CREATED
-)
-async def create_practice_pattern(
-    practice_patteren_create: PracticePatternCreate,
-    session: AsyncSession = Depends(get_session),
-    current_user: User = Depends(get_current_user),
-):
-    await role_check(
-        current_user,
-        [Role.ADMIN],
-        "Только администратор имеет доступ к данному эндпоинту",
-    )
-    new_practice_pattern = await qr.create_practice_pattern(
-        session, practice_patteren_create
-    )
-    return new_practice_pattern
-
-
-@router.get("s/patterns", response_model=List[PracticePatternInDB])
-async def get_practice_patterns(
-    filters: GetPracticePatternsFilters = Depends(),
-    session: AsyncSession = Depends(get_session),
-    current_user: User = Depends(get_current_user),
-):
-    await role_check(
-        current_user,
-        [Role.ADMIN],
-        "Только администратор имеет доступ к данному эндпоинту",
-    )
-    practice_patterns = await qr.get_practice_patterns(session, filters)
-    return practice_patterns
-
-
-@router.get("s/pattern", response_model=PracticePatternInDB)
-async def get_practice_pattern_by_id(
-    practice_pattern_id: int,
-    session: AsyncSession = Depends(get_session),
-    current_user: User = Depends(get_current_user),
-):
-    await role_check(
-        current_user,
-        [Role.ADMIN],
-        "Только администратор имеет доступ к данному эндпоинту",
-    )
-    practice_pattern = await qr.get_practice_pattern_by_id(session, practice_pattern_id)
-    return practice_pattern
-
-
-@router.delete("s/pattern/{pattern_id}", status_code=status.HTTP_200_OK)
-async def delete_practice_pattern(
-    pattern_id: int,
-    session: AsyncSession = Depends(get_session),
-    current_user: User = Depends(get_current_user),
-):
-    await role_check(
-        current_user,
-        [Role.ADMIN],
-        "Только администратор имеет доступ к данному эндпоинту",
-    )
-    await qr.delete_practice_pattern(session, pattern_id)
-    return {"detail": "Паттерн удалён"}
 
 
 @router.post(

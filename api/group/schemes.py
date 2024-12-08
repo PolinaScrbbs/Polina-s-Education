@@ -1,7 +1,8 @@
-from typing import List, Optional
+from typing import List, Optional, Union
 from pydantic import BaseModel
 
 from ..user.schemes import ID, BaseUser
+from ..practice.schemes import PracticeInDB
 
 
 class SpecializationCreate(BaseModel):
@@ -22,13 +23,17 @@ class GroupCreate(BaseModel):
 
 class GroupWithOutStudents(ID):
     number: str
-    specialization: str
+    specialization: Union[str, SpecializationInDB]
     course: int
     director: BaseUser
 
 
 class GroupWithStudents(GroupWithOutStudents):
     students: List[BaseUser]
+
+
+class GroupWithPractices(GroupWithOutStudents):
+    practices: List[PracticeInDB]
 
 
 class GroupWithOutSpecialization(ID):

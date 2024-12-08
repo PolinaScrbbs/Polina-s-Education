@@ -6,8 +6,7 @@ from sqlalchemy.sql import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..auth.validators import ValidateError
-from ..group.models import Specialization
-from .models import PracticePattern, Practice, practice_modules
+from .models import Practice, practice_modules
 
 
 class PracticeModulesValidator:
@@ -97,46 +96,13 @@ async def practice_creator_exists(
     return result
 
 
-async def specialization_exists(
-    session: AsyncSession, code: str = None, title: str = None
-) -> bool:
-    query = select(
-        exists().where((Specialization.code == code) | (Specialization.title == title))
-    )
-    result = await session.scalar(query)
-    return result
-
-
-async def specialization_exists_by_id(
-    session: AsyncSession, specialization_id: int
-) -> bool:
-    query = select(exists().where(Specialization.id == specialization_id))
-    result = await session.scalar(query)
-    return result
-
-
-async def practice_pattern_exists(
-    session: AsyncSession, type: str, specialization_id: int, course_number: int
-) -> bool:
-    query = select(
-        exists().where(
-            PracticePattern.type == type,
-            PracticePattern.specialization_id == specialization_id,
-            PracticePattern.course_number == course_number,
-        )
-    )
-    result = await session.scalar(query)
-    return result
-
-
 async def practice_create_validate(
-    session: AsyncSession, title: str, pattern_id: int, start_at: Optional[datetime]
+    session: AsyncSession, title: str, start_at: Optional[datetime]
 ) -> bool:
     query = (
         select(Practice)
         .where(
             Practice.title == title,
-            Practice.pattern_id == pattern_id,
         )
         .order_by(Practice.start_at.desc())
         .limit(1)

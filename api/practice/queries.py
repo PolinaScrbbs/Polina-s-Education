@@ -7,110 +7,12 @@ from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from ..group.models import Specialization
-from .models import Practice, PracticePattern, practice_modules
+from .models import Practice, practice_modules
 from .schemes import (
-    PracticePatternInDB,
-    PracticePatternCreate,
-    GetPracticePatternsFilters,
     PracticeCreate,
     GetPracticeFilters,
 )
 from . import validators as validator
-
-
-async def create_practice_pattern(
-    session: AsyncSession, practice_pattern_create: PracticePatternCreate
-) -> PracticePattern:
-    exist = await validator.specialization_exists_by_id(
-        session, practice_pattern_create.specialization_id
-    )
-
-    if not exist:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Специальность не найдена"
-        )
-
-    exist = await validator.practice_pattern_exists(
-        session,
-        practice_pattern_create.type,
-        practice_pattern_create.specialization_id,
-        practice_pattern_create.course_number,
-    )
-
-    if exist:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="Паттерн уже существует",
-        )
-
-    new_practice_pattern = PracticePattern(
-        type=practice_pattern_create.type,
-        specialization_id=practice_pattern_create.specialization_id,
-        course_number=practice_pattern_create.course_number,
-    )
-
-    session.add(new_practice_pattern)
-    await session.commit()
-    await session.refresh(new_practice_pattern)
-
-    return new_practice_pattern
-
-
-async def get_practice_patterns(
-    session: AsyncSession, filters: Optional[GetPracticePatternsFilters]
-) -> List[PracticePattern]:
-    query = select(PracticePattern)
-    if filters:
-        if filters.type is not None:
-            query = query.where(PracticePattern.type == filters.type)
-        if filters.specialization_id is not None:
-            query = query.where(
-                PracticePattern.specialization_id == filters.specialization_id
-            )
-        if filters.course_number is not None:
-            query = query.where(PracticePattern.course_number == filters.course_number)
-
-    result = await session.execute(query)
-    practice_patterns = result.scalars().all()
-
-    if not practice_patterns:
-        if not filters:
-            raise HTTPException(status_code=status.HTTP_204_NO_CONTENT)
-        else:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Паттерн(ы), удовлетворяющий(ие) фильтрам не найден(ы)",
-            )
-
-    return practice_patterns
-
-
-async def get_practice_pattern_by_id(
-    session: AsyncSession, practice_pattern_id: int
-) -> PracticePatternInDB:
-    result = await session.execute(
-        select(PracticePattern).where(PracticePattern.id == practice_pattern_id)
-    )
-    practice_pattern = result.scalar_one_or_none()
-
-    if not practice_pattern:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Паттерн не найден"
-        )
-
-    return practice_pattern
-
-
-async def delete_practice_pattern(session: AsyncSession, pattern_id: int):
-    pattern = await session.get(PracticePattern, pattern_id)
-    if not pattern:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Шаблон практики не найден",
-        )
-    await session.delete(pattern)
-    await session.commit()
 
 
 async def create_practice(
