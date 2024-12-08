@@ -39,4 +39,5 @@ class GroupWithOutSpecialization(ID):
 
 class SpecializationWithGroups(BaseModel):
     title: str
+    code: str
     groups: List[GroupWithOutSpecialization]

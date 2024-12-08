@@ -21,6 +21,7 @@ class BaseUser(ID):
     username: str
     role: str
     full_name: str
+    group_id: Optional[int]
 
 
 class UserResponse(BaseModel):

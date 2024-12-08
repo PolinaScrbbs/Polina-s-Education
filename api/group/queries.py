@@ -126,8 +126,6 @@ async def create_group(
     if group_create.is_commeration:
         number += "K"
 
-    print(number)
-
     if not group_create.director_id:
         group_create.director_id = current_user_id
 
@@ -164,6 +162,7 @@ async def get_groups(session: AsyncSession):
     specializations_data = [
         SpecializationWithGroups(
             title=spec.title,
+            code=spec.code,
             groups=[
                 GroupWithOutSpecialization(
                     id=group.id,
@@ -174,6 +173,7 @@ async def get_groups(session: AsyncSession):
                         username=group.director.username,
                         role=group.director.role,
                         full_name=group.director.full_name,
+                        group_id=group.director.group_id,
                     ),
                 )
                 for group in spec.groups

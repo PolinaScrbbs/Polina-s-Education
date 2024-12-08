@@ -38,6 +38,7 @@ async def group_to_pydantic(
         username=director.username,
         role=director.role,
         full_name=director.full_name,
+        group_id=director.group_id,
     )
 
     return GroupWithOutStudents(

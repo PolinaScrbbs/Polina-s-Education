@@ -22,6 +22,7 @@ async def registration_user(session: AsyncSession, user_create: UserCreate) -> B
         username=user.username,
         role=user.role.value,
         full_name=user.full_name,
+        group_id=user.group_id,
     )
 
 
