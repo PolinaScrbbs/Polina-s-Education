@@ -45,7 +45,7 @@ async def login():
 
         status, token = await response.login(username, password)
 
-        if status == 201 or 200:
+        if status in [200, 201]:
             return redirect(url_for("practice.practices", token=token["access_token"]))
         else:
             return await render_template("login.html", username=username)
