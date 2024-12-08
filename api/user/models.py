@@ -35,9 +35,16 @@ class User(Base):
     role = Column(Enum(Role), default=Role.STUDENT, nullable=False)
     group_id = Column(Integer, ForeignKey("groups.id"), default=None)
 
-    group = relationship("Group", back_populates="students")
+    group = relationship(
+        "Group",
+        back_populates="students",
+        foreign_keys="[User.group_id]",
+    )
     controlled_groups = relationship(
-        "Group", back_populates="director", cascade="all, delete-orphan"
+        "Group",
+        back_populates="director",
+        foreign_keys="[Group.director_id]",
+        cascade="all, delete-orphan",
     )
     created_practices = relationship(
         "Practice", back_populates="creator", cascade="all, delete-orphan"

@@ -1,12 +1,12 @@
 from typing import List, Optional
 from fastapi import HTTPException, status
+from sqlalchemy import func
 from sqlalchemy.future import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from ..group.models import Specialization
-from .schemes import (
-    SpecializationCreate,
-)
+from ..user.queries import get_user_by_id
+from .models import Group, Specialization
+from .schemes import SpecializationCreate, GroupCreate, GroupWithOutStudents
 from . import validators as validator
 
 
@@ -93,3 +93,47 @@ async def delete_specialization(session: AsyncSession, specialization_id: int):
         )
     await session.delete(specialization)
     await session.commit()
+
+
+async def get_group_count_by_specialization(
+    session: AsyncSession, specialization_id: int
+) -> int:
+    result = await session.execute(
+        select(func.count(Group.id)).where(Group.specialization_id == specialization_id)
+    )
+    return result.scalar_one_or_none() or 1
+
+
+async def create_group(
+    session: AsyncSession, group_create: GroupCreate, current_user_id: int
+) -> GroupWithOutStudents:
+    specialization = await get_specialization(
+        session, group_create.specialization_id, None, None
+    )
+    group_count = await get_group_count_by_specialization(
+        session, group_create.specialization_id
+    )
+
+    number = specialization.code + "-" + str(group_create.course) + str(group_count)
+    if group_create.is_commeration:
+        number += "K"
+
+    print(number)
+
+    if not group_create.director_id:
+        group_create.director_id = current_user_id
+
+    new_group = Group(
+        number=number,
+        specialization_id=group_create.specialization_id,
+        course=group_create.course,
+        director_id=group_create.director_id,
+    )
+
+    session.add(new_group)
+    await session.commit()
+    await session.refresh(new_group)
+
+    director = await get_user_by_id(session, group_create.director_id)
+
+    return await validator.group_to_pydantic(new_group, specialization.title, director)

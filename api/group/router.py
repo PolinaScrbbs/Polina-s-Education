@@ -11,6 +11,8 @@ from . import queries as qr
 from .schemes import (
     SpecializationCreate,
     SpecializationInDB,
+    GroupCreate,
+    GroupWithOutStudents,
 )
 
 router = APIRouter(prefix="/group")
@@ -69,3 +71,21 @@ async def delete_specialization(
     )
     await qr.delete_specialization(session, specialization_id)
     return {"detail": "Специальность удалена"}
+
+
+@router.post(
+    "", response_model=GroupWithOutStudents, status_code=status.HTTP_201_CREATED
+)
+async def create_group(
+    group_create: GroupCreate,
+    session: AsyncSession = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+):
+    await role_check(
+        current_user,
+        [Role.ADMIN],
+        "Только администратор имеет доступ к данному эндпоинту",
+    )
+
+    new_group = await qr.create_group(session, group_create, current_user.id)
+    return new_group

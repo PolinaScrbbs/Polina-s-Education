@@ -1,7 +1,9 @@
 from sqlalchemy import select, exists
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from ..group.models import Specialization
+from ..user.models import User
+from .models import Group, Specialization
+from .schemes import GroupWithOutStudents, BaseUser
 
 
 async def specialization_exists_by_code(
@@ -26,3 +28,22 @@ async def specialization_exists_by_id(
     query = select(exists().where(Specialization.id == specialization_id))
     result = await session.scalar(query)
     return result
+
+
+async def group_to_pydantic(
+    group: Group, specialization: str, director: User
+) -> GroupWithOutStudents:
+    director = BaseUser(
+        id=director.id,
+        username=director.username,
+        role=director.role,
+        full_name=director.full_name,
+    )
+
+    return GroupWithOutStudents(
+        id=group.id,
+        number=group.number,
+        specialization=specialization,
+        course=group.course,
+        director=director,
+    )

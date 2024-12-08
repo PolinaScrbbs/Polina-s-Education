@@ -3,7 +3,6 @@ from sqlalchemy import (
     ForeignKey,
     String,
     Integer,
-    UniqueConstraint,
     CheckConstraint,
 )
 from sqlalchemy.orm import relationship
@@ -33,15 +32,19 @@ class Group(Base):
     course = Column(Integer, default=3, nullable=False)
     director_id = Column(Integer, ForeignKey("users.id"), nullable=False)
 
-    director = relationship("User", back_populates="controlled_groups")
+    director = relationship(
+        "User",
+        back_populates="controlled_groups",
+        foreign_keys="[Group.director_id]",
+    )
     specialization = relationship("Specialization", back_populates="groups")
     students = relationship(
-        "User", back_populates="group", cascade="all, delete-orphan"
+        "User",
+        back_populates="group",
+        foreign_keys="[User.group_id]",
+        cascade="all, delete-orphan",
     )
 
     __table_args__ = (
-        UniqueConstraint(
-            "specialization_id", "course", name="unique_specialization_course"
-        ),
         CheckConstraint("course >= 2 AND course <= 4", name="check_course_range"),
     )
